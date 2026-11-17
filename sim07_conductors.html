@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lecture 02 · Conductors in Electrostatic Equilibrium</title>
+<style>:root{--navy:#1a3a8f;--pos:#d32f2f;--neg:#1565c0;--net:#2e7d32;--accent:#ef6c00;--ink:#1f2430;--muted:#5f6675;--line:#d9dde6;--bg:#f6f8fc}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:18px;padding:10px 18px;border-bottom:3px solid var(--navy);flex-wrap:wrap}
+header h1{font-size:22px;margin:0;color:var(--navy);font-weight:700}
+header .crumb{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:15px;padding:7px 14px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+main{flex:1;display:flex;min-height:0}
+#stage{flex:1;position:relative;min-width:0;background:#fff}
+#stage canvas.main{display:block;width:100%;height:100%;touch-action:none}
+aside{width:360px;flex:none;padding:14px 16px 24px;border-left:1px solid var(--line);overflow:auto;background:var(--bg);font-size:15px;line-height:1.4}
+.panel{display:none}.panel.on{display:block}
+aside h2{font-size:17px;margin:4px 0 8px;color:var(--navy)}
+aside h3{font-size:14px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.row{margin:8px 0}
+.row label{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.row label b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--navy)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.btns button,.btn{font:inherit;font-size:14px;padding:6px 11px;border:1px solid #b9c0cf;background:#fff;border-radius:7px;cursor:pointer}
+.btns button:hover{border-color:var(--navy)}
+.btns button.on{background:#e3e9f8;border-color:var(--navy);color:var(--navy);font-weight:600}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;margin:5px 0;cursor:pointer}
+.readout{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14.5px;font-variant-numeric:tabular-nums}
+.readout div{display:flex;justify-content:space-between;gap:10px}
+.readout b{font-weight:600}
+.note{font-size:13.5px;color:var(--muted);margin:8px 0}
+.try{font-size:13.5px;background:#fff8e6;border-left:4px solid #f0b429;padding:7px 10px;margin:12px 0;border-radius:4px}
+.try b{color:#8a5a00}
+table.comp{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.comp th,table.comp td{padding:3px 4px;text-align:right;border-bottom:1px solid var(--line)}
+table.comp th{color:var(--muted);font-weight:600}
+table.comp tr.sum td{font-weight:700;border-top:2px solid var(--ink)}
+canvas.plot{width:100%;height:210px;background:#fff;border:1px solid var(--line);border-radius:8px;display:block}
+.hint{position:absolute;left:44px;top:10px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.85);padding:3px 8px;border-radius:6px;pointer-events:none}
+.badge{position:absolute;right:12px;top:10px;font-size:15px;background:rgba(255,255,255,.92);border:1px solid var(--line);padding:6px 10px;border-radius:8px;pointer-events:none;font-variant-numeric:tabular-nums}
+.badge:empty{display:none}
+
+.cbar{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px}
+.cbar .bar{width:170px;height:10px;border-radius:5px;background:linear-gradient(90deg,#ffffff,#c5d4ef,#6f8fd0,#1a3a8f,#0b1d4f);margin:4px 0}
+.cbar .ends{display:flex;justify-content:space-between;color:var(--muted)}
+</style></head>
+<body>
+<header>
+  <div><h1>Conductors in Electrostatic Equilibrium</h1><div class="crumb">207106 · Lecture 02 · Gauss's Law · Live simulation 7</div></div>
+  <nav class="tabs"><button data-tab="field">① Conductor in a field</button><button data-tab="charged">② Charged conductor</button><button data-tab="cage">③ Faraday cage</button></nav>
+</header>
+<main>
+  <div id="stage"><canvas class="main" id="cv"></canvas><div class="hint" id="hint"></div><div class="badge" id="badge"></div>
+    <div class="cbar">field strength |E|<div class="bar"></div><div class="ends"><span>0</span><span>strong</span></div></div></div>
+  <aside>
+    <div class="panel" data-tab="field">
+      <h2>A neutral conductor in a uniform field</h2>
+      <div class="note">The field is computed by solving Laplace's equation numerically, with the conductor held at one potential and its total charge kept at zero.</div>
+      <div class="btns" id="f_shape"><button data-s="disk" class="on">disk</button><button data-s="ellipse">ellipse</button><button data-s="square">square</button><button data-s="drop">pointed</button></div>
+      <div class="row"><label>external field E₀ <b><span id="f_E_v"></span></b></label><input type="range" id="f_E" min="0" max="2" step="0.05" value="1"></div>
+      <div class="readout" id="f_read"></div>
+      <div class="try"><b>Look for:</b> E = 0 everywhere inside (white). Field lines meet the surface at <b>right angles</b>. Induced − charge on the side facing the incoming field, + on the other side, total zero. Drag the conductor around.</div>
+    </div>
+    <div class="panel" data-tab="charged">
+      <h2>Where does excess charge go?</h2>
+      <div class="note">The conductor carries a net positive charge and there is no external field.</div>
+      <div class="btns" id="q_shape"><button data-s="drop" class="on">pointed</button><button data-s="ellipse">ellipse</button><button data-s="disk">disk</button><button data-s="square">square</button></div>
+      <div class="readout" id="q_read"></div>
+      <div class="try"><b>Look for:</b> all the charge sits on the <b>surface</b>, and it crowds at sharp points, where the field just outside (σ/ε₀) is strongest. This is why lightning rods are pointed, and why sharp edges on high-voltage equipment spark.</div>
+    </div>
+    <div class="panel" data-tab="cage">
+      <h2>Shielding: a hollow conductor</h2>
+      <div class="btns" id="g_shape"><button data-s="ring" class="on">round shell</button><button data-s="box">square shell</button></div>
+      <label class="chk"><input type="checkbox" id="g_gap"> cut a gap in the shell</label>
+      <div class="row"><label>external field E₀ <b><span id="g_E_v"></span></b></label><input type="range" id="g_E" min="0" max="2" step="0.05" value="1"></div>
+      <div class="readout" id="g_read"></div>
+      <div class="try"><b>Look for:</b> the cavity stays field-free however strong E₀ is. The charges rearrange on the <b>outer</b> surface only. Cut a gap: the field leaks in a little, but only near the opening.</div>
+    </div>
+  </aside>
+</main>
+<script>const K=8.99e9;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function fmt(v,d=3){if(!isFinite(v))return '∞';if(v===0)return '0';const a=Math.abs(v);if(a>=1e4||a<1e-2)return v.toExponential(d-1).replace('e','×10^').replace(/\^\+?(-?\d+)/,(m,e)=>sup(e));return v.toPrecision(d).replace(/\.?0+$/,m=>m.includes('.')?'':m);}
+function sup(e){const m={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return [...String(e)].map(c=>m[c]||c).join('');}
+function f2(v,d=2){return (Math.abs(v)<5e-13?0:v).toFixed(d);}
+class View{
+  constructor(cv){this.cv=cv;this.ctx=cv.getContext('2d');this.b=[-1,1,-1,1];}
+  resize(){const r=this.cv.getBoundingClientRect(),d=window.devicePixelRatio||1;this.cv.width=Math.max(1,r.width*d);this.cv.height=Math.max(1,r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.W=r.width;this.H=r.height;this.fit(...this.b);}
+  fit(x0,x1,y0,y1){this.b=[x0,x1,y0,y1];this.s=Math.min(this.W/(x1-x0),this.H/(y1-y0));this.cx=(x0+x1)/2;this.cy=(y0+y1)/2;}
+  X(x){return this.W/2+(x-this.cx)*this.s} Y(y){return this.H/2-(y-this.cy)*this.s}
+  ix(p){return (p-this.W/2)/this.s+this.cx} iy(p){return -(p-this.H/2)/this.s+this.cy}
+  clear(){this.ctx.clearRect(0,0,this.W,this.H);}
+  grid(unit='m'){const c=this.ctx,st=niceStep(80/this.s);const xa=this.ix(0),xb=this.ix(this.W),ya=this.iy(this.H),yb=this.iy(0);
+    c.lineWidth=1;c.font='12px Segoe UI,Arial';c.fillStyle='#9aa1ae';
+    for(let x=Math.ceil(xa/st)*st;x<=xb;x+=st){const p=this.X(x);c.strokeStyle=Math.abs(x)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(p,0);c.lineTo(p,this.H);c.stroke();c.fillText(+x.toFixed(3)+'',p+3,this.H-6);}
+    for(let y=Math.ceil(ya/st)*st;y<=yb;y+=st){const p=this.Y(y);c.strokeStyle=Math.abs(y)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(0,p);c.lineTo(this.W,p);c.stroke();c.fillText(+y.toFixed(3)+'',4,p-3);}
+    c.fillText(unit,this.W-22,this.H-6);}
+}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+function arrow(c,x0,y0,x1,y1,color,w=3,head=12,dash=null){const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy);if(L<1)return;const ux=dx/L,uy=dy/L,h=Math.min(head,L*0.6);
+  c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=w;c.lineCap='round';if(dash)c.setLineDash(dash);
+  c.beginPath();c.moveTo(x0,y0);c.lineTo(x1-ux*h*0.8,y1-uy*h*0.8);c.stroke();c.setLineDash([]);
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-ux*h-uy*h*0.45,y1-uy*h+ux*h*0.45);c.lineTo(x1-ux*h+uy*h*0.45,y1-uy*h-ux*h*0.45);c.closePath();c.fill();c.restore();}
+function label(c,t,x,y,color='#1f2430',size=15,align='left',bold=false){c.save();c.font=(bold?'600 ':'')+size+'px Segoe UI,Arial';c.textAlign=align;c.lineWidth=4;c.strokeStyle='rgba(255,255,255,.9)';c.strokeText(t,x,y);c.fillStyle=color;c.fillText(t,x,y);c.restore();}
+function drawCharge(c,x,y,q,r=16,txt=null,sel=false){const col=q>0?'#d32f2f':q<0?'#1565c0':'#888';const g=c.createRadialGradient(x-r*.35,y-r*.35,r*.15,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(.35,q>0?'#ef7a7a':q<0?'#6aa3e6':'#bbb');g.addColorStop(1,col);
+  c.save();c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();if(sel){c.strokeStyle='#ef6c00';c.lineWidth=3;c.beginPath();c.arc(x,y,r+4,0,7);c.stroke();}
+  c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.moveTo(x-r*.45,y);c.lineTo(x+r*.45,y);if(q>0){c.moveTo(x,y-r*.45);c.lineTo(x,y+r*.45);}c.stroke();c.restore();if(txt)label(c,txt,x,y-r-7,col,14,'center',true);}
+// simple plotter
+function plot(cv,o){const d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();cv.width=r.width*d;cv.height=r.height*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);const W=r.width,H=r.height;c.clearRect(0,0,W,H);
+  const L=48,R=10,T=12,B=34;const tx=v=>o.logx?Math.log10(v):v,ty=v=>o.logy?Math.log10(v):v;
+  const X0=tx(o.xmin),X1=tx(o.xmax),Y0=ty(o.ymin),Y1=ty(o.ymax);const PX=v=>L+(tx(v)-X0)/(X1-X0)*(W-L-R),PY=v=>T+(1-(ty(v)-Y0)/(Y1-Y0))*(H-T-B);
+  c.font='11px Segoe UI,Arial';c.fillStyle='#777';c.strokeStyle='#eceef3';c.lineWidth=1;
+  const ticks=(a,b,log)=>{if(log){const t=[];for(let e=Math.ceil(a);e<=Math.floor(b);e++)t.push(Math.pow(10,e));return t;}const s=niceStep((b-a)/5),t=[];for(let v=Math.ceil(a/s)*s;v<=b+1e-12;v+=s)t.push(+v.toPrecision(10));return t;};
+  for(const v of ticks(X0,X1,o.logx)){const p=PX(v);c.beginPath();c.moveTo(p,T);c.lineTo(p,H-B);c.stroke();c.textAlign='center';c.fillText(o.logx?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),p,H-B+13);}
+  for(const v of ticks(Y0,Y1,o.logy)){const p=PY(v);c.beginPath();c.moveTo(L,p);c.lineTo(W-R,p);c.stroke();c.textAlign='right';c.fillText(o.logy?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),L-4,p+4);}
+  c.strokeStyle='#999';c.strokeRect(L,T,W-L-R,H-T-B);
+  if(!o.logy&&o.ymin<0&&o.ymax>0){c.strokeStyle='#555';c.beginPath();c.moveTo(L,PY(0));c.lineTo(W-R,PY(0));c.stroke();}
+  if(o.vlines)for(const v of o.vlines){c.strokeStyle=v.color||'#aaa';c.setLineDash([4,4]);c.beginPath();c.moveTo(PX(v.x),T);c.lineTo(PX(v.x),H-B);c.stroke();c.setLineDash([]);if(v.t){c.fillStyle=v.color||'#888';c.textAlign='left';c.fillText(v.t,PX(v.x)+3,T+11);}}
+  c.save();c.beginPath();c.rect(L,T,W-L-R,H-T-B);c.clip();
+  for(const s of o.series){c.strokeStyle=s.color;c.lineWidth=s.width||2;c.setLineDash(s.dash||[]);c.beginPath();let pen=false;for(const [x,y] of s.pts){if(!isFinite(y)||(o.logy&&y<=0)||(o.logx&&x<=0)){pen=false;continue;}const px=PX(x),py=Math.max(-1e4,Math.min(1e4,PY(y)));pen?c.lineTo(px,py):c.moveTo(px,py);pen=true;}c.stroke();}
+  c.setLineDash([]);if(o.marker&&isFinite(o.marker.y)){c.fillStyle=o.marker.color||'#ef6c00';c.beginPath();c.arc(PX(o.marker.x),PY(o.marker.y),5,0,7);c.fill();}
+  c.restore();c.fillStyle='#444';c.font='12px Segoe UI,Arial';c.textAlign='center';c.fillText(o.xlabel||'',L+(W-L-R)/2,H-4);
+  c.save();c.translate(11,T+(H-T-B)/2);c.rotate(-Math.PI/2);c.fillText(o.ylabel||'',0,0);c.restore();
+  if(o.legend){let y=T+14;c.textAlign='left';for(const s of o.series)if(s.name){c.strokeStyle=s.color;c.lineWidth=2;c.setLineDash(s.dash||[]);c.beginPath();c.moveTo(W-R-118,y-4);c.lineTo(W-R-98,y-4);c.stroke();c.setLineDash([]);c.fillStyle='#333';c.fillText(s.name,W-R-94,y);y+=15;}}}
+// tabs + slider helpers
+function setupTabs(tabs,onSwitch){const go=n=>{if(!tabs.includes(n))n=tabs[0];$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));$$('.panel').forEach(p=>p.classList.toggle('on',p.dataset.tab===n));history.replaceState(null,'','#'+n);onSwitch(n);};
+  $$('.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));go(location.hash.slice(1));}
+function slider(id,fn,f=v=>v){const el=document.getElementById(id),out=document.getElementById(id+'_v');const up=()=>{const v=+el.value;if(out)out.textContent=f(v);fn(v);};el.addEventListener('input',up);up();return el;}
+function pointer(cv,{down,move,up}){let active=false;const pos=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
+  cv.addEventListener('pointerdown',e=>{if(down&&down(...pos(e))!==false){active=true;cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{const p=pos(e);if(active)move&&move(...p);else if(cv._hover)cv.style.cursor=cv._hover(...p)?'grab':'default';});
+  cv.addEventListener('pointerup',e=>{if(active){active=false;up&&up(...pos(e));}});}
+</script>
+<script>
+const cv=$('#cv'),ctx=cv.getContext('2d');let tab='field';
+const NX=230,NY=150,Wd=4.6,Hd=3.0,h=Wd/NX;   // domain [-2.3,2.3]x[-1.5,1.5]
+const V=new Float32Array(NX*NY),M=new Uint8Array(NX*NY);let c0=0,E0=1,mode='field',shape='disk',gap=false,cx=0,cy=0,iters=0,conv=false;
+const X=i=>-Wd/2+(i+0.5)*h,Y=j=>-Hd/2+(j+0.5)*h;
+function inShape(x,y){x-=cx;y-=cy;const r=Math.hypot(x,y);
+  switch(shape){case 'disk':return r<0.5;case 'ellipse':return (x/0.85)**2+(y/0.3)**2<1;case 'square':return Math.abs(x)<0.45&&Math.abs(y)<0.45;
+   case 'drop':{if(Math.hypot(x+0.25,y)<0.42)return true;if(x>-0.25&&x<0.85){const w=0.42*(1-(x+0.25)/1.1);return Math.abs(y)<w;}return false;}
+   case 'ring':{const ok=r<0.8&&r>0.66;if(gap&&ok&&x>0&&Math.abs(y)<0.16)return false;return ok;}
+   case 'box':{const a=Math.max(Math.abs(x),Math.abs(y));const ok=a<0.78&&a>0.64;if(gap&&ok&&x>0&&Math.abs(y)<0.16)return false;return ok;}}return false;}
+function hollow(x,y){x-=cx;y-=cy;if(shape==='ring')return Math.hypot(x,y)<=0.66;if(shape==='box')return Math.max(Math.abs(x),Math.abs(y))<=0.64;return false;}
+function bc(i,j){return mode==='charged'?0:-E0*X(i);}
+function setup(keep){for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=j*NX+i,m=inShape(X(i),Y(j))?1:0;M[k]=m;if(!keep||i===0||j===0||i===NX-1||j===NY-1)V[k]=bc(i,j);}
+  if(mode==='charged')c0=1;else if(!keep)c0=-E0*cx;for(let k=0;k<NX*NY;k++)if(M[k])V[k]=c0;iters=0;conv=false;}
+function netQ(){let q=0,n=0;for(let j=1;j<NY-1;j++)for(let i=1;i<NX-1;i++){const k=j*NX+i;if(!M[k])continue;for(const d of[1,-1,NX,-NX])if(!M[k+d]){q+=c0-V[k+d];n++;}}return [q,n];}
+function sweep(n){const w=1.92;let maxd=0;for(let s=0;s<n;s++){for(let p=0;p<2;p++)for(let j=1;j<NY-1;j++){for(let i=1+((j+p)&1);i<NX-1;i+=2){const k=j*NX+i;if(M[k])continue;const nv=0.25*(V[k-1]+V[k+1]+V[k-NX]+V[k+NX]);const d=nv-V[k];V[k]+=w*d;if(Math.abs(d)>maxd)maxd=Math.abs(d);}}
+  iters++;if(mode!=='charged'&&iters%6===0){const [q,nn]=netQ();if(nn){c0-=0.6*q/nn;for(let k=0;k<NX*NY;k++)if(M[k])V[k]=c0;}}}
+  if(maxd<2e-5*Math.max(1e-3,E0+ (mode==='charged'?1:0))&&iters>200)conv=true;}
+function Eat(x,y){const fi=(x+Wd/2)/h-0.5,fj=(y+Hd/2)/h-0.5;const i=Math.floor(fi),j=Math.floor(fj);if(i<1||j<1||i>=NX-2||j>=NY-2)return null;const tx=fi-i,ty=fj-j;
+  const g=(i,j)=>{const k=j*NX+i;return [-(V[k+1]-V[k-1])/(2*h),-(V[k+NX]-V[k-NX])/(2*h)];};
+  const a=g(i,j),b=g(i+1,j),c=g(i,j+1),d=g(i+1,j+1);return [(a[0]*(1-tx)+b[0]*tx)*(1-ty)+(c[0]*(1-tx)+d[0]*tx)*ty,(a[1]*(1-tx)+b[1]*tx)*(1-ty)+(c[1]*(1-tx)+d[1]*tx)*ty];}
+function cellM(x,y){const i=Math.floor((x+Wd/2)/h),j=Math.floor((y+Hd/2)/h);if(i<0||j<0||i>=NX||j>=NY)return 2;return M[j*NX+i];}
+function trace(x,y,dir,maxs=2500){const pts=[[x,y]];const st=h*0.7;for(let s=0;s<maxs;s++){const e=Eat(x,y);if(!e)break;const m=Math.hypot(e[0],e[1]);if(m<1e-6)break;const xm=x+dir*e[0]/m*st/2,ym=y+dir*e[1]/m*st/2;const e2=Eat(xm,ym);if(!e2)break;const m2=Math.hypot(e2[0],e2[1]);if(m2<1e-6)break;x+=dir*e2[0]/m2*st;y+=dir*e2[1]/m2*st;pts.push([x,y]);if(cellM(x,y)===1)break;}return pts;}
+// view
+let sc=1,ox=0,oy=0,Wc=0,Hc=0;const img=document.createElement('canvas');img.width=NX;img.height=NY;const ictx=img.getContext('2d');const idata=ictx.createImageData(NX,NY);
+function resize(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);Wc=r.width;Hc=r.height;sc=Math.min(Wc/Wd,Hc/Hd);ox=Wc/2;oy=Hc/2;}
+const PX=x=>ox+x*sc,PY=y=>oy-y*sc,IX=p=>(p-ox)/sc,IY=p=>-(p-oy)/sc;
+const RAMP=[[255,255,255],[197,212,239],[111,143,208],[26,58,143],[11,29,79]];
+function ramp(t){t=Math.max(0,Math.min(1,t))*(RAMP.length-1);const i=Math.min(RAMP.length-2,Math.floor(t)),f=t-i;return RAMP[i].map((v,k)=>v+(RAMP[i+1][k]-v)*f);}
+let boundary=[];
+function draw(){ctx.clearRect(0,0,Wc,Hc);const Eref=mode==='charged'?1.6:Math.max(0.3,E0)*3.2;
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=j*NX+i,p=((NY-1-j)*NX+i)*4;if(M[k]){idata.data.set([176,186,200,255],p);continue;}
+    let ex=0,ey=0;if(i>0&&i<NX-1&&j>0&&j<NY-1){ex=-(V[k+1]-V[k-1])/(2*h);ey=-(V[k+NX]-V[k-NX])/(2*h);}const t=Math.sqrt(Math.hypot(ex,ey)/Eref);const c=ramp(t*0.85);idata.data.set([c[0],c[1],c[2],255],p);}
+  ictx.putImageData(idata,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(img,PX(-Wd/2),PY(Hd/2),Wd*sc,Hd*sc);
+  // field lines
+  ctx.strokeStyle='rgba(239,108,0,.9)';ctx.lineWidth=1.6;const lines=[];
+  if(mode==='charged'){const pts=boundary.filter(b=>b.s>0);let tot=pts.reduce((a,b)=>a+b.s,0),acc=0,n=34,next=tot/n/2;for(const b of pts){acc+=b.s;if(acc>=next){lines.push(trace(b.x+b.nx*h*1.2,b.y+b.ny*h*1.2,1));next+=tot/n;}}}
+  else if(E0>0){for(let y=-1.42;y<=1.42;y+=0.12){lines.push(trace(-Wd/2+h*1.6,y,1));lines.push(trace(Wd/2-h*1.6,y,-1));}}
+  for(const L of lines){ctx.beginPath();L.forEach(([x,y],i)=>i?ctx.lineTo(PX(x),PY(y)):ctx.moveTo(PX(x),PY(y)));ctx.stroke();if(L.length>60){const m=Math.floor(L.length/2);const [x0,y0]=L[m-3],[x1,y1]=L[m];arrow(ctx,PX(x0),PY(y0),PX(x1),PY(y1),'rgba(239,108,0,.95)',0.01,8);}}
+  // surface charges
+  const smax=Math.max(1e-9,...boundary.map(b=>Math.abs(b.s)));ctx.font='bold 13px Segoe UI,Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  boundary.forEach((b,i)=>{if(i%3)return;const a=Math.abs(b.s)/smax;if(a<0.06)return;ctx.fillStyle=b.s>0?`rgba(211,47,47,${0.35+0.65*a})`:`rgba(21,101,192,${0.35+0.65*a})`;ctx.font=`bold ${10+8*a}px Segoe UI,Arial`;ctx.fillText(b.s>0?'+':'−',PX(b.x-b.nx*h*1.5),PY(b.y-b.ny*h*1.5));});
+  ctx.textBaseline='alphabetic';
+  if(mode!=='charged'&&E0>0){label(ctx,'external field E₀ →',Wc-150,Hc-14,'#2e7d32',15,'left',true);}
+  readouts();}
+function computeBoundary(){boundary=[];for(let j=1;j<NY-1;j++)for(let i=1;i<NX-1;i++){const k=j*NX+i;if(!M[k])continue;let s=0,nx=0,ny=0;for(const [d,dx,dy] of[[1,1,0],[-1,-1,0],[NX,0,1],[-NX,0,-1]])if(!M[k+d]){s+=(V[k+d]-c0)/h*-1;nx+=dx;ny+=dy;}
+  if(nx||ny||s){const m=Math.hypot(nx,ny)||1;boundary.push({x:X(i),y:Y(j),s:-s,nx:nx/m,ny:ny/m});}}
+  boundary.forEach(b=>b.s=-b.s);boundary.sort((a,b)=>Math.atan2(a.y-cy,a.x-cx)-Math.atan2(b.y-cy,b.x-cx));}
+function readouts(){let maxIn=0;for(let j=1;j<NY-1;j++)for(let i=1;i<NX-1;i++){const k=j*NX+i;if(M[k]||!hollow(X(i),Y(j)))continue;const e=Math.hypot(V[k+1]-V[k-1],V[k+NX]-V[k-NX])/(2*h);maxIn=Math.max(maxIn,e);}
+  const [q]=netQ();const pos=boundary.filter(b=>b.s>0).reduce((a,b)=>a+b.s,0),neg=boundary.filter(b=>b.s<0).reduce((a,b)=>a+b.s,0);
+  const sm=Math.max(...boundary.map(b=>b.s)),sn=Math.min(...boundary.map(b=>Math.abs(b.s)));
+  const st=conv?'<span style="color:#2e7d32">converged</span>':'<span style="color:#ef6c00">solving…</span>';
+  if(tab==='field'){$('#f_read').innerHTML=`<div><span>E inside the conductor</span><b>0 (exactly)</b></div><div><span>induced + charge</span><b>${fmt(pos*h,3)}</b></div><div><span>induced − charge</span><b>${fmt(neg*h,3)}</b></div><div><span>net charge</span><b>${Math.abs(q*h)<0.02*Math.max(pos*h,1e-9)?'≈ 0':fmt(q*h,2)}</b></div><div><span>solver</span><b>${st}</b></div>`;$('#badge').innerHTML='E = 0 inside · field lines ⟂ surface';}
+  if(tab==='charged'){$('#q_read').innerHTML=`<div><span>charge inside the bulk</span><b>0</b></div><div><span>largest σ / smallest σ on surface</span><b>${fmt(sm/Math.max(sn,1e-9),3)}</b></div><div><span>solver</span><b>${st}</b></div>`;$('#badge').innerHTML=shape==='drop'?'charge crowds at the <b>sharp tip</b>':'all excess charge on the surface';}
+  if(tab==='cage'){$('#g_read').innerHTML=`<div><span>external field E₀</span><b>${E0.toFixed(2)}</b></div><div><span>largest |E| inside the cavity</span><b>${fmt(maxIn,2)}</b></div><div><span>ratio to E₀</span><b>${E0>0?(maxIn/E0*100).toFixed(1)+' %':'—'}</b></div><div><span>|E| at the cavity centre / E₀</span><b>${(()=>{const e=Eat(cx,cy);return e&&E0>0?(Math.hypot(e[0],e[1])/E0*100).toFixed(1)+' %':'—';})()}</b></div><div><span>solver</span><b>${st}</b></div>`;$('#badge').innerHTML=gap?'gap: field leaks in near the opening':'closed shell: <b>E = 0 in the cavity</b>';}}
+/* ---------- UI ---------- */
+function reset(keep){setup(keep);}
+function pick(group,fn){$$(group+' button').forEach(b=>b.onclick=()=>{$$(group+' button').forEach(o=>o.classList.toggle('on',o===b));fn(b.dataset.s);});}
+pick('#f_shape',s=>{shape=s;reset(true);});pick('#q_shape',s=>{shape=s;reset(true);});pick('#g_shape',s=>{shape=s;reset(true);});
+slider('f_E',v=>{E0=v;if(tab==='field')reset(false);},v=>v.toFixed(2));slider('g_E',v=>{E0=v;if(tab==='cage')reset(false);},v=>v.toFixed(2));
+$('#g_gap').onchange=()=>{gap=$('#g_gap').checked;reset(true);};
+let drag=null;pointer(cv,{down:(x,y)=>{if(inShape(IX(x),IY(y))||hollow(IX(x),IY(y))){drag=[IX(x)-cx,IY(y)-cy];return true;}return false;},move:(x,y)=>{cx=Math.max(-1.2,Math.min(1.2,IX(x)-drag[0]));cy=Math.max(-0.5,Math.min(0.5,IY(y)-drag[1]));reset(true);},up:()=>{drag=null;}});
+cv._hover=(x,y)=>inShape(IX(x),IY(y))||hollow(IX(x),IY(y));
+window.addEventListener('resize',resize);resize();
+setupTabs(['field','charged','cage'],n=>{tab=n;cx=0;cy=0;mode=n==='charged'?'charged':'field';
+  shape=$((n==='field'?'#f_shape':n==='charged'?'#q_shape':'#g_shape')+' button.on').dataset.s;gap=n==='cage'&&$('#g_gap').checked;E0=n==='field'?+$('#f_E').value:n==='cage'?+$('#g_E').value:0;
+  $('#hint').textContent='Drag the conductor to move it';reset(false);});
+(function loop(){if(!conv)sweep(14);computeBoundary();draw();requestAnimationFrame(loop);})();
+</script>
+</body></html>

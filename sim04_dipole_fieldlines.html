@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lecture 01 · Electric Dipole & Field Lines</title>
+<style>:root{--navy:#1a3a8f;--pos:#d32f2f;--neg:#1565c0;--net:#2e7d32;--accent:#ef6c00;--ink:#1f2430;--muted:#5f6675;--line:#d9dde6;--bg:#f6f8fc}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:18px;padding:10px 18px;border-bottom:3px solid var(--navy);flex-wrap:wrap}
+header h1{font-size:22px;margin:0;color:var(--navy);font-weight:700}
+header .crumb{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:15px;padding:7px 14px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+main{flex:1;display:flex;min-height:0}
+#stage{flex:1;position:relative;min-width:0;background:#fff}
+#stage canvas.main{display:block;width:100%;height:100%;touch-action:none}
+aside{width:360px;flex:none;padding:14px 16px 24px;border-left:1px solid var(--line);overflow:auto;background:var(--bg);font-size:15px;line-height:1.4}
+.panel{display:none}.panel.on{display:block}
+aside h2{font-size:17px;margin:4px 0 8px;color:var(--navy)}
+aside h3{font-size:14px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.row{margin:8px 0}
+.row label{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.row label b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--navy)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.btns button,.btn{font:inherit;font-size:14px;padding:6px 11px;border:1px solid #b9c0cf;background:#fff;border-radius:7px;cursor:pointer}
+.btns button:hover{border-color:var(--navy)}
+.btns button.on{background:#e3e9f8;border-color:var(--navy);color:var(--navy);font-weight:600}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;margin:5px 0;cursor:pointer}
+.readout{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14.5px;font-variant-numeric:tabular-nums}
+.readout div{display:flex;justify-content:space-between;gap:10px}
+.readout b{font-weight:600}
+.note{font-size:13.5px;color:var(--muted);margin:8px 0}
+.try{font-size:13.5px;background:#fff8e6;border-left:4px solid #f0b429;padding:7px 10px;margin:12px 0;border-radius:4px}
+.try b{color:#8a5a00}
+table.comp{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.comp th,table.comp td{padding:3px 4px;text-align:right;border-bottom:1px solid var(--line)}
+table.comp th{color:var(--muted);font-weight:600}
+table.comp tr.sum td{font-weight:700;border-top:2px solid var(--ink)}
+canvas.plot{width:100%;height:210px;background:#fff;border:1px solid var(--line);border-radius:8px;display:block}
+.hint{position:absolute;left:44px;top:10px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.85);padding:3px 8px;border-radius:6px;pointer-events:none}
+.badge{position:absolute;right:12px;top:10px;font-size:15px;background:rgba(255,255,255,.92);border:1px solid var(--line);padding:6px 10px;border-radius:8px;pointer-events:none;font-variant-numeric:tabular-nums}
+.badge:empty{display:none}
+</style></head>
+<body>
+<header>
+  <div><h1>Electric Dipole &amp; Field Lines</h1><div class="crumb">207106 · Lecture 01 · Electric Charge and Field · Live simulation 4</div></div>
+  <nav class="tabs">
+    <button data-tab="lines">① Field-line explorer</button>
+    <button data-tab="dipole">② Dipole: axial &amp; equatorial</button>
+    <button data-tab="torque">③ Dipole in uniform E</button>
+  </nav>
+</header>
+<main>
+  <div id="stage"><canvas class="main" id="cv"></canvas><div class="hint" id="hint"></div><div class="badge" id="badge"></div></div>
+  <aside>
+    <div class="panel" data-tab="lines">
+      <h2>Field lines</h2>
+      <div class="btns" id="l_presets">
+        <button data-p="single">single +q</button><button data-p="neg">single −q</button><button data-p="dipole">dipole +q, −q</button>
+        <button data-p="like">two +q</button><button data-p="unequal">+2q and −q</button><button data-p="quad">quadrupole</button>
+      </div>
+      <div class="btns"><button id="l_addp">+ positive</button><button id="l_addn">+ negative</button><button id="l_del">✕ delete selected</button></div>
+      <div class="row"><label>selected charge <b><span id="l_q_v"></span> q</b></label><input type="range" id="l_q" min="-3" max="3" step="0.5" value="1"></div>
+      <div class="row"><label>lines per unit charge <b><span id="l_n_v"></span></b></label><input type="range" id="l_n" min="4" max="24" step="1" value="12"></div>
+      <label class="chk"><input type="checkbox" id="l_vec"> show E-vector grid</label>
+      <div class="btns"><button id="l_test">⊕ drop a test charge (click on field)</button><button id="l_clear">clear test charges</button></div>
+      <div class="readout" id="l_read"></div>
+      <div class="try"><b>Rules to check:</b> lines start on + and end on −. The number of lines is proportional to |q|. Lines never cross. Where they crowd together, E is strong. <br><b>Misconception test:</b> drop a test charge from rest near the dipole. Does it travel <i>along</i> a curved field line?</div>
+    </div>
+    <div class="panel" data-tab="dipole">
+      <h2>Field of a dipole: p = qd</h2>
+      <div class="btns" id="d_mode"><button data-m="axial" class="on">on the axis</button><button data-m="eq">on the equator (bisector)</button></div>
+      <div class="row"><label>distance from centre r <b><span id="d_r_v"></span> d</b></label><input type="range" id="d_r" min="-0.15" max="1.3" step="0.005" value="0.3"></div>
+      <div class="row"><label>separation d <b><span id="d_d_v"></span> m</b></label><input type="range" id="d_d" min="0.1" max="0.6" step="0.01" value="0.3"></div>
+      <label class="chk"><input type="checkbox" id="d_lines" checked> field lines in background</label>
+      <div class="readout" id="d_read"></div>
+      <h3>|E| vs r (log–log), current point ●</h3>
+      <canvas class="plot" id="d_plot"></canvas>
+      <div class="try"><b>Notice:</b> far away the dipole field falls as <b>1/r³</b> (slope −3), faster than a single charge's 1/r² (slope −2). On the axis E is <b>twice</b> as large as on the equator, and on the equator E points <b>opposite</b> to p.</div>
+    </div>
+    <div class="panel" data-tab="torque">
+      <h2>τ = p × E , U = −p · E</h2>
+      <div class="row"><label>field strength E <b><span id="t_E_v"></span></b></label><input type="range" id="t_E" min="0.2" max="2" step="0.05" value="1"></div>
+      <div class="row"><label>damping <b><span id="t_b_v"></span></b></label><input type="range" id="t_b" min="0" max="1" step="0.02" value="0.08"></div>
+      <div class="btns"><button id="t_play">▶ Release</button><button id="t_pause">■ Hold</button><button id="t_90">set φ = 90°</button><button id="t_179">set φ = 179°</button></div>
+      <div class="readout" id="t_read"></div>
+      <h3>U(φ)/pE and τ(φ)/pE</h3>
+      <canvas class="plot" id="t_plot"></canvas>
+      <div class="try"><b>Try:</b> drag the dipole to any angle and release it. The net force is always zero, but the torque is not. Where is U lowest? What happens if you start at φ = 179°?</div>
+    </div>
+  </aside>
+</main>
+<script>const K=8.99e9;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function fmt(v,d=3){if(!isFinite(v))return '∞';if(v===0)return '0';const a=Math.abs(v);if(a>=1e4||a<1e-2)return v.toExponential(d-1).replace('e','×10^').replace(/\^\+?(-?\d+)/,(m,e)=>sup(e));return v.toPrecision(d).replace(/\.?0+$/,m=>m.includes('.')?'':m);}
+function sup(e){const m={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return [...String(e)].map(c=>m[c]||c).join('');}
+function f2(v,d=2){return (Math.abs(v)<5e-13?0:v).toFixed(d);}
+class View{
+  constructor(cv){this.cv=cv;this.ctx=cv.getContext('2d');this.b=[-1,1,-1,1];}
+  resize(){const r=this.cv.getBoundingClientRect(),d=window.devicePixelRatio||1;this.cv.width=Math.max(1,r.width*d);this.cv.height=Math.max(1,r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.W=r.width;this.H=r.height;this.fit(...this.b);}
+  fit(x0,x1,y0,y1){this.b=[x0,x1,y0,y1];this.s=Math.min(this.W/(x1-x0),this.H/(y1-y0));this.cx=(x0+x1)/2;this.cy=(y0+y1)/2;}
+  X(x){return this.W/2+(x-this.cx)*this.s} Y(y){return this.H/2-(y-this.cy)*this.s}
+  ix(p){return (p-this.W/2)/this.s+this.cx} iy(p){return -(p-this.H/2)/this.s+this.cy}
+  clear(){this.ctx.clearRect(0,0,this.W,this.H);}
+  grid(unit='m'){const c=this.ctx,st=niceStep(80/this.s);const xa=this.ix(0),xb=this.ix(this.W),ya=this.iy(this.H),yb=this.iy(0);
+    c.lineWidth=1;c.font='12px Segoe UI,Arial';c.fillStyle='#9aa1ae';
+    for(let x=Math.ceil(xa/st)*st;x<=xb;x+=st){const p=this.X(x);c.strokeStyle=Math.abs(x)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(p,0);c.lineTo(p,this.H);c.stroke();c.fillText(+x.toFixed(3)+'',p+3,this.H-6);}
+    for(let y=Math.ceil(ya/st)*st;y<=yb;y+=st){const p=this.Y(y);c.strokeStyle=Math.abs(y)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(0,p);c.lineTo(this.W,p);c.stroke();c.fillText(+y.toFixed(3)+'',4,p-3);}
+    c.fillText(unit,this.W-22,this.H-6);}
+}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+function arrow(c,x0,y0,x1,y1,color,w=3,head=12,dash=null){const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy);if(L<1)return;const ux=dx/L,uy=dy/L,h=Math.min(head,L*0.6);
+  c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=w;c.lineCap='round';if(dash)c.setLineDash(dash);
+  c.beginPath();c.moveTo(x0,y0);c.lineTo(x1-ux*h*0.8,y1-uy*h*0.8);c.stroke();c.setLineDash([]);
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-ux*h-uy*h*0.45,y1-uy*h+ux*h*0.45);c.lineTo(x1-ux*h+uy*h*0.45,y1-uy*h-ux*h*0.45);c.closePath();c.fill();c.restore();}
+function label(c,t,x,y,color='#1f2430',size=15,align='left',bold=false){c.save();c.font=(bold?'600 ':'')+size+'px Segoe UI,Arial';c.textAlign=align;c.lineWidth=4;c.strokeStyle='rgba(255,255,255,.9)';c.strokeText(t,x,y);c.fillStyle=color;c.fillText(t,x,y);c.restore();}
+function drawCharge(c,x,y,q,r=16,txt=null,sel=false){const col=q>0?'#d32f2f':q<0?'#1565c0':'#888';const g=c.createRadialGradient(x-r*.35,y-r*.35,r*.15,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(.35,q>0?'#ef7a7a':q<0?'#6aa3e6':'#bbb');g.addColorStop(1,col);
+  c.save();c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();if(sel){c.strokeStyle='#ef6c00';c.lineWidth=3;c.beginPath();c.arc(x,y,r+4,0,7);c.stroke();}
+  c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.moveTo(x-r*.45,y);c.lineTo(x+r*.45,y);if(q>0){c.moveTo(x,y-r*.45);c.lineTo(x,y+r*.45);}c.stroke();c.restore();if(txt)label(c,txt,x,y-r-7,col,14,'center',true);}
+// simple plotter
+function plot(cv,o){const d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();cv.width=r.width*d;cv.height=r.height*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);const W=r.width,H=r.height;c.clearRect(0,0,W,H);
+  const L=48,R=10,T=12,B=34;const tx=v=>o.logx?Math.log10(v):v,ty=v=>o.logy?Math.log10(v):v;
+  const X0=tx(o.xmin),X1=tx(o.xmax),Y0=ty(o.ymin),Y1=ty(o.ymax);const PX=v=>L+(tx(v)-X0)/(X1-X0)*(W-L-R),PY=v=>T+(1-(ty(v)-Y0)/(Y1-Y0))*(H-T-B);
+  c.font='11px Segoe UI,Arial';c.fillStyle='#777';c.strokeStyle='#eceef3';c.lineWidth=1;
+  const ticks=(a,b,log)=>{if(log){const t=[];for(let e=Math.ceil(a);e<=Math.floor(b);e++)t.push(Math.pow(10,e));return t;}const s=niceStep((b-a)/5),t=[];for(let v=Math.ceil(a/s)*s;v<=b+1e-12;v+=s)t.push(+v.toPrecision(10));return t;};
+  for(const v of ticks(X0,X1,o.logx)){const p=PX(v);c.beginPath();c.moveTo(p,T);c.lineTo(p,H-B);c.stroke();c.textAlign='center';c.fillText(o.logx?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),p,H-B+13);}
+  for(const v of ticks(Y0,Y1,o.logy)){const p=PY(v);c.beginPath();c.moveTo(L,p);c.lineTo(W-R,p);c.stroke();c.textAlign='right';c.fillText(o.logy?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),L-4,p+4);}
+  c.strokeStyle='#999';c.strokeRect(L,T,W-L-R,H-T-B);
+  if(!o.logy&&o.ymin<0&&o.ymax>0){c.strokeStyle='#555';c.beginPath();c.moveTo(L,PY(0));c.lineTo(W-R,PY(0));c.stroke();}
+  if(o.vlines)for(const v of o.vlines){c.strokeStyle=v.color||'#aaa';c.setLineDash([4,4]);c.beginPath();c.moveTo(PX(v.x),T);c.lineTo(PX(v.x),H-B);c.stroke();c.setLineDash([]);if(v.t){c.fillStyle=v.color||'#888';c.textAlign='left';c.fillText(v.t,PX(v.x)+3,T+11);}}
+  c.save();c.beginPath();c.rect(L,T,W-L-R,H-T-B);c.clip();
+  for(const s of o.series){c.strokeStyle=s.color;c.lineWidth=s.width||2;c.setLineDash(s.dash||[]);c.beginPath();let pen=false;for(const [x,y] of s.pts){if(!isFinite(y)||(o.logy&&y<=0)||(o.logx&&x<=0)){pen=false;continue;}const px=PX(x),py=Math.max(-1e4,Math.min(1e4,PY(y)));pen?c.lineTo(px,py):c.moveTo(px,py);pen=true;}c.stroke();}
+  c.setLineDash([]);if(o.marker&&isFinite(o.marker.y)){c.fillStyle=o.marker.color||'#ef6c00';c.beginPath();c.arc(PX(o.marker.x),PY(o.marker.y),5,0,7);c.fill();}
+  c.restore();c.fillStyle='#444';c.font='12px Segoe UI,Arial';c.textAlign='center';c.fillText(o.xlabel||'',L+(W-L-R)/2,H-4);
+  c.save();c.translate(11,T+(H-T-B)/2);c.rotate(-Math.PI/2);c.fillText(o.ylabel||'',0,0);c.restore();
+  if(o.legend){let y=T+14;c.textAlign='left';for(const s of o.series)if(s.name){c.strokeStyle=s.color;c.lineWidth=2;c.setLineDash(s.dash||[]);c.beginPath();c.moveTo(W-R-118,y-4);c.lineTo(W-R-98,y-4);c.stroke();c.setLineDash([]);c.fillStyle='#333';c.fillText(s.name,W-R-94,y);y+=15;}}}
+// tabs + slider helpers
+function setupTabs(tabs,onSwitch){const go=n=>{if(!tabs.includes(n))n=tabs[0];$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));$$('.panel').forEach(p=>p.classList.toggle('on',p.dataset.tab===n));history.replaceState(null,'','#'+n);onSwitch(n);};
+  $$('.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));go(location.hash.slice(1));}
+function slider(id,fn,f=v=>v){const el=document.getElementById(id),out=document.getElementById(id+'_v');const up=()=>{const v=+el.value;if(out)out.textContent=f(v);fn(v);};el.addEventListener('input',up);up();return el;}
+function pointer(cv,{down,move,up}){let active=false;const pos=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
+  cv.addEventListener('pointerdown',e=>{if(down&&down(...pos(e))!==false){active=true;cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{const p=pos(e);if(active)move&&move(...p);else if(cv._hover)cv.style.cursor=cv._hover(...p)?'grab':'default';});
+  cv.addEventListener('pointerup',e=>{if(active){active=false;up&&up(...pos(e));}});}
+</script>
+<script>
+const cv=$('#cv'),V=new View(cv),c=V.ctx;let tab='lines';const T={};
+function Efield(Q,x,y,soft=0){let ex=0,ey=0;for(const s of Q){const dx=x-s.x,dy=y-s.y,r2=dx*dx+dy*dy+soft,r3=r2*Math.sqrt(r2);ex+=s.q*dx/r3;ey+=s.q*dy/r3;}return [ex,ey];}
+function traceLines(Q,perUnit,bounds,r0=0.09){const lines=[];const B=bounds;
+  const tr=(x,y,dir,maxSteps=2500)=>{const pts=[[x,y]];let h=0.018,end=null;for(let i=0;i<maxSteps;i++){let [ex,ey]=Efield(Q,x,y);let m=Math.hypot(ex,ey);if(!m)break;const kx=dir*ex/m,ky=dir*ey/m;let [ex2,ey2]=Efield(Q,x+kx*h/2,y+ky*h/2);const m2=Math.hypot(ex2,ey2);x+=dir*ex2/m2*h;y+=dir*ey2/m2*h;pts.push([x,y]);
+     for(const s of Q){if(Math.hypot(x-s.x,y-s.y)<r0*0.9&&i>3){end=s;break;}}if(end)break;if(x<B[0]-3||x>B[1]+3||y<B[2]-3||y>B[3]+3)break;}return {pts,end};};
+  const tp=Q.filter(s=>s.q>0).reduce((a,s)=>a+s.q,0),tn=-Q.filter(s=>s.q<0).reduce((a,s)=>a+s.q,0);
+  Q.forEach((s,k)=>{const n=Math.round(Math.abs(s.q)*perUnit);if(!n)return;for(let i=0;i<n;i++){const a=2*Math.PI*(i+0.5)/n+0.13*k;const x=s.x+r0*Math.cos(a),y=s.y+r0*Math.sin(a);
+    if(s.q>0){lines.push(tr(x,y,1).pts);}else{const L=tr(x,y,-1);if(!(L.end&&L.end.q>0))lines.push(L.pts.reverse());}}});
+  return lines;}
+function drawLines(lines,color='#5c6bc0',w=1.6){c.strokeStyle=color;c.lineWidth=w;for(const L of lines){c.beginPath();L.forEach(([x,y],i)=>i?c.lineTo(V.X(x),V.Y(y)):c.moveTo(V.X(x),V.Y(y)));c.stroke();
+  for(let i=70;i<L.length-10;i+=140){const [x0,y0]=L[i-8],[x1,y1]=L[i];arrow(c,V.X(x0),V.Y(y0),V.X(x1),V.Y(y1),color,0.01,10);}}}
+/* ---------- explorer ---------- */
+T.lines={Q:[],sel:0,n:12,drag:null,testMode:false,tests:[],lines:[],dirty:true,
+ preset(p){const P={single:[[0,0,1]],neg:[[0,0,-1]],dipole:[[-0.8,0,1],[0.8,0,-1]],like:[[-0.8,0,1],[0.8,0,1]],unequal:[[-0.7,0,2],[0.7,0,-1]],quad:[[-0.7,0.7,1],[0.7,0.7,-1],[0.7,-0.7,1],[-0.7,-0.7,-1]]}[p];
+  this.Q=P.map(([x,y,q])=>({x,y,q}));this.sel=0;this.tests=[];this.dirty=true;$$('#l_presets button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));this.sync();},
+ sync(){const s=this.Q[this.sel];if(s){$('#l_q').value=s.q;$('#l_q_v').textContent=s.q;}},
+ enter(){if(!this.Q.length)this.preset('dipole');V.fit(-3,3,-2,2);this.dirty=true;$('#hint').textContent='Drag charges · click a charge to select it';$('#badge').innerHTML='';},
+ step(dt){for(const t of this.tests){if(t.dead)continue;for(let k=0;k<10;k++){const [ex,ey]=Efield(this.Q,t.x,t.y,0.004);t.vx+=ex*dt/10*0.6;t.vy+=ey*dt/10*0.6;t.x+=t.vx*dt/10;t.y+=t.vy*dt/10;}t.path.push([t.x,t.y]);if(t.path.length>1500)t.path.shift();
+   if(this.Q.some(s=>Math.hypot(s.x-t.x,s.y-t.y)<0.08)||Math.abs(t.x)>8||Math.abs(t.y)>8)t.dead=true;}},
+ draw(){if(this.dirty){this.lines=traceLines(this.Q,this.n,V.b);this.dirty=false;}
+  if($('#l_vec').checked){const st=40;for(let px=st/2;px<V.W;px+=st)for(let py=st/2;py<V.H;py+=st){const x=V.ix(px),y=V.iy(py);if(this.Q.some(s=>Math.hypot(V.X(s.x)-px,V.Y(s.y)-py)<22))continue;const [ex,ey]=Efield(this.Q,x,y),m=Math.hypot(ex,ey);if(!m)continue;const a=Math.max(.15,Math.min(.9,0.5+0.3*Math.log10(m)));arrow(c,px-8*ex/m,py+8*ey/m,px+8*ex/m,py-8*ey/m,`rgba(46,125,50,${a})`,1.5,6);}}
+  drawLines(this.lines);
+  for(const t of this.tests){c.strokeStyle='#ef6c00';c.lineWidth=2.5;c.setLineDash([6,4]);c.beginPath();t.path.forEach(([x,y],i)=>i?c.lineTo(V.X(x),V.Y(y)):c.moveTo(V.X(x),V.Y(y)));c.stroke();c.setLineDash([]);c.fillStyle='#ef6c00';c.beginPath();c.arc(V.X(t.x),V.Y(t.y),6,0,7);c.fill();}
+  this.Q.forEach((s,i)=>drawCharge(c,V.X(s.x),V.Y(s.y),s.q,13+3*Math.abs(s.q),(s.q>0?'+':'')+s.q+'q',i===this.sel));
+  const tp=this.Q.filter(s=>s.q>0).reduce((a,s)=>a+s.q,0),tn=this.Q.filter(s=>s.q<0).reduce((a,s)=>a+s.q,0);
+  $('#l_read').innerHTML=`<div><span>total charge</span><b>${tp+tn>0?'+':''}${tp+tn} q</b></div><div><span>lines drawn</span><b>${this.lines.length}</b></div><div class="note" style="margin:3px 0 0">${tp+tn!==0?'Net charge ≠ 0: some lines go to (or come from) infinity.':'Net charge 0: every line from + ends on −.'}</div>`;
+  $('#hint').textContent=this.testMode?'Click anywhere to drop a test charge (+) from rest':'Drag charges · click a charge to select it';},
+ down(x,y){if(this.testMode){this.tests.push({x:V.ix(x),y:V.iy(y),vx:0,vy:0,path:[]});this.testMode=false;$('#l_test').classList.remove('on');return false;}
+  for(let i=this.Q.length-1;i>=0;i--){const s=this.Q[i];if(Math.hypot(V.X(s.x)-x,V.Y(s.y)-y)<22){this.drag=s;this.sel=i;this.sync();return true;}}return false;},
+ move(x,y){this.drag.x=V.ix(x);this.drag.y=V.iy(y);this.dirty=true;this.tests=[];}};
+const LN=T.lines;
+$$('#l_presets button').forEach(b=>b.onclick=()=>LN.preset(b.dataset.p));
+$('#l_addp').onclick=()=>{LN.Q.push({x:0,y:1.2,q:1});LN.sel=LN.Q.length-1;LN.sync();LN.dirty=true;};
+$('#l_addn').onclick=()=>{LN.Q.push({x:0,y:-1.2,q:-1});LN.sel=LN.Q.length-1;LN.sync();LN.dirty=true;};
+$('#l_del').onclick=()=>{if(LN.Q.length>1){LN.Q.splice(LN.sel,1);LN.sel=0;LN.sync();LN.dirty=true;}};
+slider('l_q',v=>{const s=LN.Q[LN.sel];if(s&&v!==0){s.q=v;LN.dirty=true;}},v=>v);
+slider('l_n',v=>{LN.n=v;LN.dirty=true;});
+$('#l_vec').onchange=()=>{};
+$('#l_test').onclick=()=>{LN.testMode=!LN.testMode;$('#l_test').classList.toggle('on',LN.testMode);};
+$('#l_clear').onclick=()=>LN.tests=[];
+
+/* ---------- dipole axial / equatorial ---------- */
+T.dipole={mode:'axial',r:2,d:0.3,q:1e-9,lines:null,key:'',
+ enter(){this.fitv();$('#hint').textContent='Drag the probe P, or use the slider';},
+ fitv(){V.fit(-2.4,2.4,-1.6,1.6);},
+ draw(){const d=this.d,q=this.q,p=q*d,r=this.r*d;const hw=Math.max(2.4,r*1.3);if(Math.abs(V.b[1]-hw)>1e-9)V.fit(-hw,hw,-hw/1.5,hw/1.5);const Q=[{x:0,y:d/2,q:1},{x:0,y:-d/2,q:-1}];
+  if($('#d_lines').checked){const key=d+'|'+hw.toFixed(1);if(this.key!==key){this.lines=traceLines(Q,14,V.b,0.05);this.key=key;}drawLines(this.lines,'rgba(92,107,192,.35)',1.2);}
+  // axes
+  c.strokeStyle='#bbb';c.setLineDash([4,4]);c.beginPath();c.moveTo(V.X(0),0);c.lineTo(V.X(0),V.H);c.moveTo(0,V.Y(0));c.lineTo(V.W,V.Y(0));c.stroke();c.setLineDash([]);
+  label(c,'axis',V.X(0)+6,16,'#999',13);label(c,'equator',V.W-60,V.Y(0)-6,'#999',13);
+  const P=this.mode==='axial'?{x:0,y:r}:{x:r,y:0};
+  const eP=(sx,sy,sq)=>{const dx=P.x-sx,dy=P.y-sy,r2=dx*dx+dy*dy,rr=Math.sqrt(r2);return [K*sq*q*dx/rr/r2,K*sq*q*dy/rr/r2];};
+  const [a1,b1]=eP(0,d/2,1),[a2,b2]=eP(0,-d/2,-1),ex=a1+a2,ey=b1+b2,E=Math.hypot(ex,ey);
+  const S=110/E,Px=V.X(P.x),Py=V.Y(P.y);const clipA=(vx,vy,col,lab)=>{let L=Math.hypot(vx,vy)*S,f=1,dash=null;if(L>V.W*0.35){f=V.W*0.35/L;dash=[7,5];}arrow(c,Px,Py,Px+vx*S*f,Py-vy*S*f,col,3,11,dash);label(c,lab+(dash?' (clipped)':''),Px+vx*S*f+6,Py-vy*S*f+(vy>0?-6:16),col,13,'left',true);};
+  clipA(a1,b1,'#e57373','E₊');clipA(a2,b2,'#64b5f6','E₋');arrow(c,Px,Py,Px+ex*S,Py-ey*S,'#2e7d32',5,15);label(c,'E_net',Px+ex*S+8,Py-ey*S+18,'#2e7d32',15,'left',true);
+  // dipole
+  arrow(c,V.X(0),V.Y(-d/2)+14,V.X(0),V.Y(d/2)-14,'#6a1b9a',3,10);label(c,'p',V.X(0)+10,V.Y(0)+5,'#6a1b9a',16,'left',true);
+  drawCharge(c,V.X(0),V.Y(d/2),1,13,'+q');drawCharge(c,V.X(0),V.Y(-d/2),-1,13);label(c,'−q',V.X(0),V.Y(-d/2)+30,'#1565c0',14,'center',true);
+  c.strokeStyle='#111';c.lineWidth=2.5;c.beginPath();c.arc(Px,Py,8,0,7);c.stroke();label(c,'P',Px+10,Py-10,'#111',15,'left',true);
+  const approx=this.mode==='axial'?2*K*p/(r*r*r):K*p/(r*r*r);
+  $('#d_read').innerHTML=`<div><span>r</span><b>${r.toFixed(3)} m = ${this.r.toFixed(2)} d</b></div><div><span>exact |E|</span><b>${fmt(E,4)} N/C</b></div><div><span>${this.mode==='axial'?'2kp/r³':'kp/r³'} (far-field)</span><b>${fmt(approx,4)} N/C</b></div><div><span>exact / approx</span><b>${(E/approx).toFixed(3)}</b></div><div><span>direction</span><b>${this.mode==='axial'?'along +p':'opposite to p'}</b></div><div class="note" style="margin:2px 0 0">q = 1 nC, p = qd = ${fmt(p,3)} C·m</div>`;
+  $('#badge').innerHTML=this.r<2?'near field: approximation poor':'far field (r ≫ d): E ∝ 1/r³';
+  const pa=[],pe=[],fa=[],fe=[],pc=[];for(let k=0;k<=160;k++){const u=Math.pow(10,-0.25+k*1.55/160),rr=u*d;if(u>0.5)pa.push([u,K*q*(1/((rr-d/2)**2)-1/((rr+d/2)**2))]);pe.push([u,K*q*d/Math.pow(rr*rr+d*d/4,1.5)]);fa.push([u,2*K*p/rr**3]);fe.push([u,K*p/rr**3]);pc.push([u,K*q/(rr*rr)]);}
+  plot($('#d_plot'),{logx:1,logy:1,xmin:0.56,xmax:20,ymin:Math.max(1e-3,K*p/(20*d)**3/3),ymax:K*q/(0.1*d*d),series:[{pts:pa,color:'#c62828',width:2.5,name:'axis exact'},{pts:fa,color:'#c62828',dash:[4,4],name:'2kp/r³'},{pts:pe,color:'#1565c0',width:2.5,name:'equator exact'},{pts:fe,color:'#1565c0',dash:[4,4],name:'kp/r³'},{pts:pc,color:'#888',dash:[1,3],name:'kq/r² (one q)'}],marker:{x:this.r,y:E},xlabel:'r / d',ylabel:'|E| (N/C)',legend:1});},
+ down(x,y){const r=this.r*this.d,P=this.mode==='axial'?{x:0,y:r}:{x:r,y:0};if(Math.hypot(V.X(P.x)-x,V.Y(P.y)-y)<18)return true;return false;},
+ move(x,y){let u=(this.mode==='axial'?V.iy(y):V.ix(x))/this.d;u=Math.max(Math.pow(10,-0.15),Math.min(Math.pow(10,1.3),u));this.r=u;$('#d_r').value=Math.log10(u);$('#d_r_v').textContent=u.toFixed(2);}};
+const DP=T.dipole;
+slider('d_r',v=>DP.r=Math.pow(10,v),v=>Math.pow(10,v).toFixed(2));slider('d_d',v=>DP.d=v,v=>v.toFixed(2));
+$$('#d_mode button').forEach(b=>b.onclick=()=>{$$('#d_mode button').forEach(o=>o.classList.toggle('on',o===b));DP.mode=b.dataset.m;});
+
+/* ---------- torque ---------- */
+T.torque={phi:Math.PI/3,w:0,run:false,E:1,b:0.08,
+ enter(){V.fit(-3,3,-2,2);$('#hint').textContent='Drag the + end to set the angle φ between p and E';},
+ step(dt){if(!this.run)return;const n=20;for(let i=0;i<n;i++){const a=-6*this.E*Math.sin(this.phi)-2*this.b*Math.sqrt(6*this.E)*this.w;this.w+=a*dt/n;this.phi+=this.w*dt/n;}this.phi=Math.atan2(Math.sin(this.phi),Math.cos(this.phi));},
+ draw(){const E=this.E,phi=this.phi,Lh=1.1;
+  for(let y=-1.8;y<=1.8;y+=0.45){c.strokeStyle='rgba(46,125,50,.25)';c.lineWidth=1.5;c.beginPath();c.moveTo(0,V.Y(y));c.lineTo(V.W,V.Y(y));c.stroke();for(let x=-2.6;x<3;x+=1.3)arrow(c,V.X(x),V.Y(y),V.X(x+0.25),V.Y(y),'rgba(46,125,50,.45)',0,10);}
+  label(c,'uniform E →',V.W-130,24,'#2e7d32',15,'left',true);
+  const ux=Math.cos(phi),uy=Math.sin(phi),px=V.X(Lh*ux),py=V.Y(Lh*uy),nx=V.X(-Lh*ux),ny=V.Y(-Lh*uy);
+  c.strokeStyle='#9e9e9e';c.lineWidth=6;c.beginPath();c.moveTo(nx,ny);c.lineTo(px,py);c.stroke();
+  arrow(c,V.X(-0.45*ux),V.Y(-0.45*uy),V.X(0.45*ux),V.Y(0.45*uy),'#6a1b9a',4,13);label(c,'p',V.X(0.5*ux)+8,V.Y(0.5*uy)-8,'#6a1b9a',17,'left',true);
+  const fl=70*E;arrow(c,px,py,px+fl,py,'#d32f2f',4,12);label(c,'F₊ = qE',px+fl/2,py-10,'#d32f2f',14,'center',true);arrow(c,nx,ny,nx-fl,ny,'#1565c0',4,12);label(c,'F₋ = −qE',nx-fl/2,ny+22,'#1565c0',14,'center',true);
+  drawCharge(c,px,py,1,15);drawCharge(c,nx,ny,-1,15);
+  c.strokeStyle='#ef6c00';c.lineWidth=2;c.beginPath();c.arc(V.X(0),V.Y(0),40,-phi,0,phi<0);c.stroke();label(c,'φ = '+(phi*180/Math.PI).toFixed(0)+'°',V.X(0)+48,V.Y(0)-6,'#ef6c00',15,'left',true);
+  const tau=-Math.sin(phi);if(Math.abs(tau)>0.02){const r=75,a0=-phi,a1=-phi+(tau>0?-0.9:0.9);c.strokeStyle='#ef6c00';c.lineWidth=3;c.beginPath();c.arc(V.X(0),V.Y(0),r,Math.min(a0,a1),Math.max(a0,a1));c.stroke();const ea=a1;const ex=V.X(0)+r*Math.cos(ea),ey=V.Y(0)+r*Math.sin(ea);const tx=-Math.sin(ea)*(tau>0?-1:1),ty=Math.cos(ea)*(tau>0?-1:1);arrow(c,ex-tx*10,ey-ty*10,ex,ey,'#ef6c00',3,11);label(c,'τ',ex+8,ey,'#ef6c00',16,'left',true);}
+  const s=Math.sin(phi),co=Math.cos(phi);
+  $('#t_read').innerHTML=`<div><span>φ (angle p to E)</span><b>${(phi*180/Math.PI).toFixed(1)}°</b></div><div><span>τ_z / pE = −sin φ</span><b>${(-s).toFixed(3)} ${Math.abs(s)<.02?'':s>0?'(clockwise)':'(counter-clockwise)'}</b></div><div><span>U / pE = −cos φ</span><b>${(-co).toFixed(3)}</b></div><div><span>net force F₊ + F₋</span><b>0</b></div>`;
+  $('#badge').innerHTML=Math.abs(phi)<0.05&&!this.run?'φ = 0: <b>stable</b> equilibrium (U minimum)':Math.abs(Math.abs(phi)-Math.PI)<0.05?'φ = 180°: <b>unstable</b> equilibrium (U maximum)':'torque rotates p toward E';
+  const pu=[],pt=[];for(let k=0;k<=200;k++){const a=-Math.PI+k*2*Math.PI/200;pu.push([a*180/Math.PI,-Math.cos(a)]);pt.push([a*180/Math.PI,Math.sin(a)]);}
+  plot($('#t_plot'),{xmin:-180,xmax:180,ymin:-1.2,ymax:1.2,series:[{pts:pu,color:'#6a1b9a',width:2.5,name:'U/pE'},{pts:pt.map(([a,b])=>[a,-b]),color:'#ef6c00',dash:[5,4],name:'τ_z/pE'}],marker:{x:phi*180/Math.PI,y:-co},xlabel:'φ (degrees)',ylabel:'',legend:1});},
+ down(x,y){const ux=Math.cos(this.phi),uy=Math.sin(this.phi);if(Math.hypot(V.X(1.1*ux)-x,V.Y(1.1*uy)-y)<26||Math.hypot(V.X(-1.1*ux)-x,V.Y(-1.1*uy)-y)<26){this.run=false;this.w=0;this.grabNeg=Math.hypot(V.X(-1.1*ux)-x,V.Y(-1.1*uy)-y)<26;return true;}return false;},
+ move(x,y){let a=Math.atan2(V.iy(y),V.ix(x));if(this.grabNeg)a+=Math.PI;this.phi=Math.atan2(Math.sin(a),Math.cos(a));}};
+const TQ=T.torque;
+slider('t_E',v=>TQ.E=v,v=>'×'+v.toFixed(2));slider('t_b',v=>TQ.b=v,v=>v.toFixed(2));
+$('#t_play').onclick=()=>{TQ.run=true;};$('#t_pause').onclick=()=>{TQ.run=false;TQ.w=0;};
+$('#t_90').onclick=()=>{TQ.phi=Math.PI/2;TQ.w=0;TQ.run=false;};$('#t_179').onclick=()=>{TQ.phi=179*Math.PI/180;TQ.w=0;TQ.run=false;};
+
+pointer(cv,{down:(x,y)=>T[tab].down(x,y),move:(x,y)=>T[tab].move(x,y),up:()=>{LN.drag=null;}});
+window.addEventListener('resize',()=>{V.resize();LN.dirty=true;DP.key='';});V.resize();
+setupTabs(['lines','dipole','torque'],n=>{tab=n;T[n].enter();});
+let last=performance.now();(function loop(t){const dt=Math.min(0.04,(t-last)/1000);last=t;if(tab==='lines')LN.step(dt);if(tab==='torque')TQ.step(dt);V.clear();T[tab].draw();requestAnimationFrame(loop);})(last);
+</script>
+</body></html>

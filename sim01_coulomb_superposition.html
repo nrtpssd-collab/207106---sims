@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lecture 01 · Coulomb's Law & Superposition</title>
+<style>:root{--navy:#1a3a8f;--pos:#d32f2f;--neg:#1565c0;--net:#2e7d32;--accent:#ef6c00;--ink:#1f2430;--muted:#5f6675;--line:#d9dde6;--bg:#f6f8fc}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:18px;padding:10px 18px;border-bottom:3px solid var(--navy);flex-wrap:wrap}
+header h1{font-size:22px;margin:0;color:var(--navy);font-weight:700}
+header .crumb{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:15px;padding:7px 14px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+main{flex:1;display:flex;min-height:0}
+#stage{flex:1;position:relative;min-width:0;background:#fff}
+#stage canvas.main{display:block;width:100%;height:100%;touch-action:none}
+aside{width:360px;flex:none;padding:14px 16px 24px;border-left:1px solid var(--line);overflow:auto;background:var(--bg);font-size:15px;line-height:1.4}
+.panel{display:none}.panel.on{display:block}
+aside h2{font-size:17px;margin:4px 0 8px;color:var(--navy)}
+aside h3{font-size:14px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.row{margin:8px 0}
+.row label{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.row label b{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--navy)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.btns button,.btn{font:inherit;font-size:14px;padding:6px 11px;border:1px solid #b9c0cf;background:#fff;border-radius:7px;cursor:pointer}
+.btns button:hover{border-color:var(--navy)}
+.btns button.on{background:#e3e9f8;border-color:var(--navy);color:var(--navy);font-weight:600}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;margin:5px 0;cursor:pointer}
+.readout{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14.5px;font-variant-numeric:tabular-nums}
+.readout div{display:flex;justify-content:space-between;gap:10px}
+.readout b{font-weight:600}
+.note{font-size:13.5px;color:var(--muted);margin:8px 0}
+.try{font-size:13.5px;background:#fff8e6;border-left:4px solid #f0b429;padding:7px 10px;margin:12px 0;border-radius:4px}
+.try b{color:#8a5a00}
+table.comp{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.comp th,table.comp td{padding:3px 4px;text-align:right;border-bottom:1px solid var(--line)}
+table.comp th{color:var(--muted);font-weight:600}
+table.comp tr.sum td{font-weight:700;border-top:2px solid var(--ink)}
+canvas.plot{width:100%;height:210px;background:#fff;border:1px solid var(--line);border-radius:8px;display:block}
+.hint{position:absolute;left:44px;top:10px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.85);padding:3px 8px;border-radius:6px;pointer-events:none}
+.badge{position:absolute;right:12px;top:10px;font-size:15px;background:rgba(255,255,255,.92);border:1px solid var(--line);padding:6px 10px;border-radius:8px;pointer-events:none;font-variant-numeric:tabular-nums}
+.badge:empty{display:none}
+</style></head>
+<body>
+<header>
+  <div><h1>Coulomb's Law &amp; Superposition</h1><div class="crumb">207106 · Lecture 01 · Electric Charge and Field · Live simulation 1</div></div>
+  <nav class="tabs">
+    <button data-tab="coulomb">① Two charges</button>
+    <button data-tab="bead">② Bead between charges</button>
+    <button data-tab="super">③ Superposition of E</button>
+  </nav>
+</header>
+<main>
+  <div id="stage"><canvas class="main" id="cv"></canvas><div class="hint" id="hint"></div><div class="badge" id="badge"></div></div>
+  <aside>
+    <!-- TAB 1 -->
+    <div class="panel" data-tab="coulomb">
+      <h2>F = k|q₁q₂| / r²</h2>
+      <div class="row"><label>q₁ <b><span id="c_q1_v"></span> µC</b></label><input type="range" id="c_q1" min="-5" max="5" step="0.5" value="2"></div>
+      <div class="row"><label>q₂ <b><span id="c_q2_v"></span> µC</b></label><input type="range" id="c_q2" min="-5" max="5" step="0.5" value="-3"></div>
+      <div class="row"><label>Arrow scale <b><span id="c_sc_v"></span></b></label><input type="range" id="c_sc" min="0" max="3" step="0.05" value="1.3"></div>
+      <div class="readout" id="c_read"></div>
+      <h3>F versus r (current point ●)</h3>
+      <canvas class="plot" id="c_plot"></canvas>
+      <div class="try"><b>Try:</b> drag a charge so r doubles. What happens to F? Flip the sign of one charge. Do the two arrows ever have different lengths?</div>
+    </div>
+    <!-- TAB 2 -->
+    <div class="panel" data-tab="bead">
+      <h2>Where is the net force on q₀ zero?</h2>
+      <div class="note">Slide example: q₁ = 3q at x = 0, q₂ = q at x = d = 1.50 m. The bead q₀ slides on the line joining them.</div>
+      <div class="row"><label>q₁ / q₂ <b><span id="b_ratio_v"></span></b></label><input type="range" id="b_ratio" min="1" max="9" step="0.5" value="3"></div>
+      <div class="row"><label>separation d <b><span id="b_d_v"></span> m</b></label><input type="range" id="b_d" min="0.5" max="3" step="0.05" value="1.5"></div>
+      <div class="row"><label>bead position x <b><span id="b_x_v"></span> m</b></label><input type="range" id="b_x" min="-1" max="4" step="0.001" value="0.5"></div>
+      <div class="btns" id="b_sign"><button data-s="1" class="on">q₀ positive</button><button data-s="-1">q₀ negative</button></div>
+      <div class="btns"><button id="b_eq">Jump to x_eq</button><button id="b_go">▶ Release bead</button><button id="b_stop">■ Stop</button></div>
+      <div class="row"><label>damping <b><span id="b_damp_v"></span></b></label><input type="range" id="b_damp" min="0" max="1" step="0.05" value="0.15"></div>
+      <div class="readout" id="b_read"></div>
+      <h3>Net force F(x) on q₀</h3>
+      <canvas class="plot" id="b_plot"></canvas>
+      <div class="try"><b>Try:</b> release a positive bead near x_eq and then a negative one. Is the equilibrium point the same? Is it stable in both cases? Also look outside the gap: can F be zero there?</div>
+    </div>
+    <!-- TAB 3 -->
+    <div class="panel" data-tab="super">
+      <h2>E<sub>net</sub> = Σ E<sub>i</sub> (vector sum)</h2>
+      <div class="btns" id="s_presets">
+        <button data-p="point">Point charge example (q = 6 nC, P(−0.8, 1.0))</button>
+        <button data-p="square">Square of four charges</button>
+        <button data-p="three">Three charges</button>
+      </div>
+      <div class="btns"><button id="s_addp">+ add positive</button><button id="s_addn">+ add negative</button><button id="s_del">✕ delete selected</button></div>
+      <div class="row"><label>selected charge <b><span id="s_q_v"></span> nC</b></label><input type="range" id="s_q" min="-12" max="12" step="0.5" value="6"></div>
+      <label class="chk"><input type="checkbox" id="s_tail"> tip-to-tail vector addition</label>
+      <label class="chk"><input type="checkbox" id="s_grid"> show field-direction grid</label>
+      <label class="chk"><input type="checkbox" id="s_comp" checked> show components of E<sub>net</sub></label>
+      <div class="row"><label>arrow scale <b><span id="s_sc_v"></span></b></label><input type="range" id="s_sc" min="-1.5" max="1.5" step="0.05" value="0"></div>
+      <div class="readout" id="s_read"></div>
+      <h3>Components at P (N/C)</h3>
+      <table class="comp" id="s_tab"></table>
+      <div class="try"><b>Try:</b> drag the probe P (the black ring) and the charges. Turn on tip-to-tail: the coloured arrows chain into the green resultant. In the square, which components cancel?</div>
+    </div>
+  </aside>
+</main>
+<script>const K=8.99e9;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function fmt(v,d=3){if(!isFinite(v))return '∞';if(v===0)return '0';const a=Math.abs(v);if(a>=1e4||a<1e-2)return v.toExponential(d-1).replace('e','×10^').replace(/\^\+?(-?\d+)/,(m,e)=>sup(e));return v.toPrecision(d).replace(/\.?0+$/,m=>m.includes('.')?'':m);}
+function sup(e){const m={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return [...String(e)].map(c=>m[c]||c).join('');}
+function f2(v,d=2){return (Math.abs(v)<5e-13?0:v).toFixed(d);}
+class View{
+  constructor(cv){this.cv=cv;this.ctx=cv.getContext('2d');this.b=[-1,1,-1,1];}
+  resize(){const r=this.cv.getBoundingClientRect(),d=window.devicePixelRatio||1;this.cv.width=Math.max(1,r.width*d);this.cv.height=Math.max(1,r.height*d);this.ctx.setTransform(d,0,0,d,0,0);this.W=r.width;this.H=r.height;this.fit(...this.b);}
+  fit(x0,x1,y0,y1){this.b=[x0,x1,y0,y1];this.s=Math.min(this.W/(x1-x0),this.H/(y1-y0));this.cx=(x0+x1)/2;this.cy=(y0+y1)/2;}
+  X(x){return this.W/2+(x-this.cx)*this.s} Y(y){return this.H/2-(y-this.cy)*this.s}
+  ix(p){return (p-this.W/2)/this.s+this.cx} iy(p){return -(p-this.H/2)/this.s+this.cy}
+  clear(){this.ctx.clearRect(0,0,this.W,this.H);}
+  grid(unit='m'){const c=this.ctx,st=niceStep(80/this.s);const xa=this.ix(0),xb=this.ix(this.W),ya=this.iy(this.H),yb=this.iy(0);
+    c.lineWidth=1;c.font='12px Segoe UI,Arial';c.fillStyle='#9aa1ae';
+    for(let x=Math.ceil(xa/st)*st;x<=xb;x+=st){const p=this.X(x);c.strokeStyle=Math.abs(x)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(p,0);c.lineTo(p,this.H);c.stroke();c.fillText(+x.toFixed(3)+'',p+3,this.H-6);}
+    for(let y=Math.ceil(ya/st)*st;y<=yb;y+=st){const p=this.Y(y);c.strokeStyle=Math.abs(y)<st/2?'#b8bfcc':'#eef0f5';c.beginPath();c.moveTo(0,p);c.lineTo(this.W,p);c.stroke();c.fillText(+y.toFixed(3)+'',4,p-3);}
+    c.fillText(unit,this.W-22,this.H-6);}
+}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+function arrow(c,x0,y0,x1,y1,color,w=3,head=12,dash=null){const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy);if(L<1)return;const ux=dx/L,uy=dy/L,h=Math.min(head,L*0.6);
+  c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=w;c.lineCap='round';if(dash)c.setLineDash(dash);
+  c.beginPath();c.moveTo(x0,y0);c.lineTo(x1-ux*h*0.8,y1-uy*h*0.8);c.stroke();c.setLineDash([]);
+  c.beginPath();c.moveTo(x1,y1);c.lineTo(x1-ux*h-uy*h*0.45,y1-uy*h+ux*h*0.45);c.lineTo(x1-ux*h+uy*h*0.45,y1-uy*h-ux*h*0.45);c.closePath();c.fill();c.restore();}
+function label(c,t,x,y,color='#1f2430',size=15,align='left',bold=false){c.save();c.font=(bold?'600 ':'')+size+'px Segoe UI,Arial';c.textAlign=align;c.lineWidth=4;c.strokeStyle='rgba(255,255,255,.9)';c.strokeText(t,x,y);c.fillStyle=color;c.fillText(t,x,y);c.restore();}
+function drawCharge(c,x,y,q,r=16,txt=null,sel=false){const col=q>0?'#d32f2f':q<0?'#1565c0':'#888';const g=c.createRadialGradient(x-r*.35,y-r*.35,r*.15,x,y,r);g.addColorStop(0,'#fff');g.addColorStop(.35,q>0?'#ef7a7a':q<0?'#6aa3e6':'#bbb');g.addColorStop(1,col);
+  c.save();c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();if(sel){c.strokeStyle='#ef6c00';c.lineWidth=3;c.beginPath();c.arc(x,y,r+4,0,7);c.stroke();}
+  c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.moveTo(x-r*.45,y);c.lineTo(x+r*.45,y);if(q>0){c.moveTo(x,y-r*.45);c.lineTo(x,y+r*.45);}c.stroke();c.restore();if(txt)label(c,txt,x,y-r-7,col,14,'center',true);}
+// simple plotter
+function plot(cv,o){const d=window.devicePixelRatio||1,r=cv.getBoundingClientRect();cv.width=r.width*d;cv.height=r.height*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);const W=r.width,H=r.height;c.clearRect(0,0,W,H);
+  const L=48,R=10,T=12,B=34;const tx=v=>o.logx?Math.log10(v):v,ty=v=>o.logy?Math.log10(v):v;
+  const X0=tx(o.xmin),X1=tx(o.xmax),Y0=ty(o.ymin),Y1=ty(o.ymax);const PX=v=>L+(tx(v)-X0)/(X1-X0)*(W-L-R),PY=v=>T+(1-(ty(v)-Y0)/(Y1-Y0))*(H-T-B);
+  c.font='11px Segoe UI,Arial';c.fillStyle='#777';c.strokeStyle='#eceef3';c.lineWidth=1;
+  const ticks=(a,b,log)=>{if(log){const t=[];for(let e=Math.ceil(a);e<=Math.floor(b);e++)t.push(Math.pow(10,e));return t;}const s=niceStep((b-a)/5),t=[];for(let v=Math.ceil(a/s)*s;v<=b+1e-12;v+=s)t.push(+v.toPrecision(10));return t;};
+  for(const v of ticks(X0,X1,o.logx)){const p=PX(v);c.beginPath();c.moveTo(p,T);c.lineTo(p,H-B);c.stroke();c.textAlign='center';c.fillText(o.logx?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),p,H-B+13);}
+  for(const v of ticks(Y0,Y1,o.logy)){const p=PY(v);c.beginPath();c.moveTo(L,p);c.lineTo(W-R,p);c.stroke();c.textAlign='right';c.fillText(o.logy?'10'+sup(Math.round(Math.log10(v))):fmt(v,3),L-4,p+4);}
+  c.strokeStyle='#999';c.strokeRect(L,T,W-L-R,H-T-B);
+  if(!o.logy&&o.ymin<0&&o.ymax>0){c.strokeStyle='#555';c.beginPath();c.moveTo(L,PY(0));c.lineTo(W-R,PY(0));c.stroke();}
+  if(o.vlines)for(const v of o.vlines){c.strokeStyle=v.color||'#aaa';c.setLineDash([4,4]);c.beginPath();c.moveTo(PX(v.x),T);c.lineTo(PX(v.x),H-B);c.stroke();c.setLineDash([]);if(v.t){c.fillStyle=v.color||'#888';c.textAlign='left';c.fillText(v.t,PX(v.x)+3,T+11);}}
+  c.save();c.beginPath();c.rect(L,T,W-L-R,H-T-B);c.clip();
+  for(const s of o.series){c.strokeStyle=s.color;c.lineWidth=s.width||2;c.setLineDash(s.dash||[]);c.beginPath();let pen=false;for(const [x,y] of s.pts){if(!isFinite(y)||(o.logy&&y<=0)||(o.logx&&x<=0)){pen=false;continue;}const px=PX(x),py=Math.max(-1e4,Math.min(1e4,PY(y)));pen?c.lineTo(px,py):c.moveTo(px,py);pen=true;}c.stroke();}
+  c.setLineDash([]);if(o.marker&&isFinite(o.marker.y)){c.fillStyle=o.marker.color||'#ef6c00';c.beginPath();c.arc(PX(o.marker.x),PY(o.marker.y),5,0,7);c.fill();}
+  c.restore();c.fillStyle='#444';c.font='12px Segoe UI,Arial';c.textAlign='center';c.fillText(o.xlabel||'',L+(W-L-R)/2,H-4);
+  c.save();c.translate(11,T+(H-T-B)/2);c.rotate(-Math.PI/2);c.fillText(o.ylabel||'',0,0);c.restore();
+  if(o.legend){let y=T+14;c.textAlign='left';for(const s of o.series)if(s.name){c.strokeStyle=s.color;c.lineWidth=2;c.setLineDash(s.dash||[]);c.beginPath();c.moveTo(W-R-118,y-4);c.lineTo(W-R-98,y-4);c.stroke();c.setLineDash([]);c.fillStyle='#333';c.fillText(s.name,W-R-94,y);y+=15;}}}
+// tabs + slider helpers
+function setupTabs(tabs,onSwitch){const go=n=>{if(!tabs.includes(n))n=tabs[0];$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));$$('.panel').forEach(p=>p.classList.toggle('on',p.dataset.tab===n));history.replaceState(null,'','#'+n);onSwitch(n);};
+  $$('.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));go(location.hash.slice(1));}
+function slider(id,fn,f=v=>v){const el=document.getElementById(id),out=document.getElementById(id+'_v');const up=()=>{const v=+el.value;if(out)out.textContent=f(v);fn(v);};el.addEventListener('input',up);up();return el;}
+function pointer(cv,{down,move,up}){let active=false;const pos=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
+  cv.addEventListener('pointerdown',e=>{if(down&&down(...pos(e))!==false){active=true;cv.setPointerCapture(e.pointerId);}});
+  cv.addEventListener('pointermove',e=>{const p=pos(e);if(active)move&&move(...p);else if(cv._hover)cv.style.cursor=cv._hover(...p)?'grab':'default';});
+  cv.addEventListener('pointerup',e=>{if(active){active=false;up&&up(...pos(e));}});}
+</script>
+<script>
+const cv=$('#cv'),V=new View(cv),c=V.ctx;let tab='coulomb';const T={};
+function setHint(t){$('#hint').textContent=t;} function setBadge(t){$('#badge').style.display=t?'block':'none';$('#badge').innerHTML=t||'';}
+
+/* ---------- TAB 1: Coulomb ---------- */
+T.coulomb={q1:{x:-0.6,y:0,q:2},q2:{x:0.6,y:0,q:-3},sc:1,drag:null,
+ enter(){V.fit(-2.2,2.2,-1.4,1.4);setHint('Drag either charge');},
+ draw(){const A=this.q1,B=this.q2;V.grid('m');
+  const dx=B.x-A.x,dy=B.y-A.y,r=Math.hypot(dx,dy),F=K*Math.abs(A.q*B.q)*1e-12/(r*r);
+  const ux=dx/r,uy=dy/r,rep=A.q*B.q>0,sgn=rep?-1:1;  // force on A along ±u
+  const px=Math.min(V.W*0.42,F*Math.pow(10,this.sc)*160);
+  c.strokeStyle='#c3c8d4';c.setLineDash([5,5]);c.lineWidth=1.5;c.beginPath();c.moveTo(V.X(A.x),V.Y(A.y));c.lineTo(V.X(B.x),V.Y(B.y));c.stroke();c.setLineDash([]);
+  label(c,'r = '+r.toFixed(3)+' m',(V.X(A.x)+V.X(B.x))/2,(V.Y(A.y)+V.Y(B.y))/2-12,'#666',14,'center');
+  if(A.q&&B.q){const ax=V.X(A.x),ay=V.Y(A.y),bx=V.X(B.x),by=V.Y(B.y);
+   arrow(c,ax,ay,ax+sgn*ux*px,ay-sgn*uy*px,'#6a1b9a',4,14);arrow(c,bx,by,bx-sgn*ux*px,by+sgn*uy*px,'#6a1b9a',4,14);
+   label(c,'F₁₂ (on q₁)',ax+sgn*ux*px*0.5,ay-sgn*uy*px*0.5+30,'#6a1b9a',14,'center',true);
+   label(c,'F₂₁ (on q₂)',bx-sgn*ux*px*0.5,by+sgn*uy*px*0.5+30,'#6a1b9a',14,'center',true);}
+  drawCharge(c,V.X(A.x),V.Y(A.y),A.q,18,'q₁ = '+A.q+' µC');drawCharge(c,V.X(B.x),V.Y(B.y),B.q,18,'q₂ = '+B.q+' µC');
+  setBadge(A.q*B.q===0?'one charge is zero → no force':(rep?'like charges → <b style="color:#d32f2f">repel</b>':'unlike charges → <b style="color:#1565c0">attract</b>'));
+  $('#c_read').innerHTML=`<div><span>r</span><b>${r.toFixed(3)} m</b></div><div><span>|F₁₂| = |F₂₁|</span><b>${fmt(F,4)} N</b></div><div><span>F₁₂ + F₂₁</span><b>0 (Newton's 3rd law)</b></div>`;
+  const pts=[];const qq=K*Math.abs(A.q*B.q)*1e-12;for(let i=0;i<=200;i++){const rr=0.15+i*(2.5-0.15)/200;pts.push([rr,qq/rr/rr]);}
+  plot($('#c_plot'),{xmin:0,xmax:2.5,ymin:0,ymax:Math.max(qq/0.04,1e-9),series:[{pts,color:'#6a1b9a'}],marker:{x:r,y:F},xlabel:'r (m)',ylabel:'F (N)'});
+ },
+ hit(x,y){for(const p of [this.q1,this.q2])if(Math.hypot(V.X(p.x)-x,V.Y(p.y)-y)<24)return p;return null;},
+ down(x,y){this.drag=this.hit(x,y);return !!this.drag;},
+ move(x,y){const o=this.drag===this.q1?this.q2:this.q1;let nx=V.ix(x),ny=V.iy(y);const d=Math.hypot(nx-o.x,ny-o.y);if(d<0.12){nx=o.x+(nx-o.x)/d*0.12;ny=o.y+(ny-o.y)/d*0.12;}this.drag.x=nx;this.drag.y=ny;}};
+slider('c_q1',v=>T.coulomb.q1.q=v);slider('c_q2',v=>T.coulomb.q2.q=v);slider('c_sc',v=>T.coulomb.sc=v,v=>'×'+fmt(Math.pow(10,v),2));
+
+/* ---------- TAB 2: bead ---------- */
+T.bead={ratio:3,d:1.5,x:0.5,s:1,v:0,run:false,damp:0.15,q:1e-6,q0:0.5e-6,msg:'',
+ F(x){const q1=this.ratio*this.q,q2=this.q,q0=this.s*this.q0;const r1=x,r2=x-this.d;return K*q0*(q1*Math.sign(r1)/(r1*r1)+q2*Math.sign(r2)/(r2*r2));},
+ xeq(){const s=Math.sqrt(this.ratio);return this.d*s/(1+s);},
+ enter(){V.fit(-0.9,this.d+0.9,-0.9,0.9);setBadge('');setHint('Drag the bead along the line, or release it');},
+ step(dt){if(!this.run)return;const xe=this.xeq(),h=1e-4;const keff=Math.abs((this.F(xe+h)-this.F(xe-h))/(2*h));const m=keff*Math.pow(2.2/(2*Math.PI),2);const w=Math.sqrt(keff/m);
+  const sub=20;for(let i=0;i<sub;i++){const a=this.F(this.x)/m-2*this.damp*w*this.v;this.v+=a*dt/sub;this.x+=this.v*dt/sub;
+   if(this.x<0.03||this.x>this.d-0.03){this.x=Math.min(Math.max(this.x,0.03),this.d-0.03);this.run=false;this.v=0;this.msg='Bead ran into a charge: the equilibrium is <b>unstable</b> for this sign of q₀.';break;}}
+  $('#b_x').value=this.x;$('#b_x_v').textContent=this.x.toFixed(3);},
+ draw(){const d=this.d,xe=this.xeq();V.grid('m');const y0=V.Y(0);
+  c.strokeStyle='#8d6e63';c.lineWidth=4;c.beginPath();c.moveTo(V.X(-0.85),y0);c.lineTo(V.X(d+0.85),y0);c.stroke();
+  c.strokeStyle='#2e7d32';c.setLineDash([4,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(V.X(xe),y0-90);c.lineTo(V.X(xe),y0+70);c.stroke();c.setLineDash([]);
+  label(c,'x_eq = '+xe.toFixed(3)+' m',V.X(xe),y0+88,'#2e7d32',14,'center',true);
+  const q1=this.ratio*this.q,q2=this.q,q0=this.s*this.q0,x=this.x;
+  const F1=K*q0*q1*Math.sign(x)/(x*x),F2=K*q0*q2*Math.sign(x-d)/((x-d)**2),Fn=F1+F2;
+  const sc=Math.min(150/Math.max(Math.abs(F1),Math.abs(F2),1e-12),150/0.05)*1;const S=v=>Math.max(-V.W*0.4,Math.min(V.W*0.4,v*6000));
+  const bx=V.X(x);
+  arrow(c,bx,y0-38,bx+S(F1),y0-38,'#d32f2f',3,11);label(c,'F₁',bx+S(F1)/2,y0-46,'#d32f2f',14,'center',true);
+  arrow(c,bx,y0-62,bx+S(F2),y0-62,'#c2185b',3,11);label(c,'F₂',bx+S(F2)/2,y0-70,'#c2185b',14,'center',true);
+  arrow(c,bx,y0+32,bx+S(Fn),y0+32,'#2e7d32',4.5,13);label(c,'F_net',bx+S(Fn)/2,y0+52,'#2e7d32',14,'center',true);
+  drawCharge(c,V.X(0),y0,1,20,'q₁ = '+this.ratio+'q');drawCharge(c,V.X(d),y0,1,15,'q₂ = q');
+  c.fillStyle=this.s>0?'#ffcdd2':'#bbdefb';c.strokeStyle='#795548';c.lineWidth=2;c.beginPath();c.arc(bx,y0,11,0,7);c.fill();c.stroke();label(c,'q₀',bx,y0-84,'#5d4037',14,'center',true);drawCharge(c,bx,y0,this.s,8);
+  $('#b_read').innerHTML=`<div><span>F₁ (from q₁)</span><b>${fmt(F1*1e3,3)} mN</b></div><div><span>F₂ (from q₂)</span><b>${fmt(F2*1e3,3)} mN</b></div><div><span>F_net</span><b>${fmt(Fn*1e3,3)} mN</b></div><div><span>x_eq = d√r/(1+√r)</span><b>${xe.toFixed(3)} m</b></div>`+(this.msg?`<div style="color:#b71c1c;display:block;margin-top:4px">${this.msg}</div>`:'');
+  const pts=[];for(let i=0;i<=600;i++){const xx=-0.9+i*(d+1.8)/600;pts.push([xx,this.F(xx)*1e3]);}
+  const Fm=Math.abs(this.F(0.25*d))*1e3*1.2;
+  plot($('#b_plot'),{xmin:-0.9,xmax:d+0.9,ymin:-Fm,ymax:Fm,series:[{pts,color:'#2e7d32'}],marker:{x,y:Fn*1e3},xlabel:'x (m)',ylabel:'F_net (mN, + = right)',vlines:[{x:0,color:'#d32f2f',t:'q₁'},{x:d,color:'#c2185b',t:'q₂'},{x:xe,color:'#2e7d32'}]});},
+ down(x,y){if(Math.abs(x-V.X(this.x))<22&&Math.abs(y-V.Y(0))<26){this.run=false;this.msg='';return true;}return false;},
+ move(x){let nx=V.ix(x);nx=Math.max(-0.85,Math.min(this.d+0.85,nx));if(Math.abs(nx)<0.03||Math.abs(nx-this.d)<0.03)return;this.x=nx;$('#b_x').value=nx;$('#b_x_v').textContent=nx.toFixed(3);}};
+slider('b_ratio',v=>{T.bead.ratio=v;T.bead.msg='';},v=>v.toFixed(1));
+slider('b_d',v=>{T.bead.d=v;$('#b_x').max=v+0.85;$('#b_x').min=-0.85;if(tab==='bead')T.bead.enter();},v=>v.toFixed(2));
+slider('b_x',v=>{if(Math.abs(v)<0.03||Math.abs(v-T.bead.d)<0.03)return;T.bead.x=v;T.bead.run=false;T.bead.msg='';},v=>v.toFixed(3));
+slider('b_damp',v=>T.bead.damp=v,v=>v.toFixed(2));
+$$('#b_sign button').forEach(b=>b.onclick=()=>{$$('#b_sign button').forEach(o=>o.classList.toggle('on',o===b));T.bead.s=+b.dataset.s;T.bead.msg='';});
+$('#b_eq').onclick=()=>{T.bead.x=T.bead.xeq();T.bead.v=0;T.bead.run=false;T.bead.msg='';};
+$('#b_go').onclick=()=>{const b=T.bead;if(b.x<=0.03||b.x>=b.d-0.03){b.msg='Place the bead between the charges first.';return;}if(Math.abs(b.x-b.xeq())<1e-3)b.x+=0.04;b.v=0;b.msg='';b.run=true;};
+$('#b_stop').onclick=()=>{T.bead.run=false;};
+
+/* ---------- TAB 3: superposition ---------- */
+const COLS=['#e53935','#8e24aa','#fb8c00','#1e88e5','#00897b','#6d4c41','#c0ca33','#5e35b1'];
+T.super={Q:[],P:{x:0,y:0},sel:0,drag:null,sc:1,base:1,
+ preset(p){if(p==='point'){this.Q=[{x:0,y:0,q:6}];this.P={x:-0.8,y:1.0};this.view=[-1.9,0.8,-0.4,1.9];}
+  if(p==='square'){const a=1;this.Q=[{x:-a/2,y:a/2,q:1},{x:a/2,y:a/2,q:1},{x:a/2,y:-a/2,q:-1},{x:-a/2,y:-a/2,q:-1}];this.P={x:0,y:0};this.view=[-1.3,1.3,-1.05,1.05];}
+  if(p==='three'){this.Q=[{x:0,y:0,q:4},{x:0,y:-0.8,q:-3},{x:0.9,y:-0.8,q:2}];this.P={x:0.9,y:0.3};this.view=[-1,1.8,-1.3,0.9];}
+  this.sel=0;$$('#s_presets button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));V.fit(...this.view);this.autoscale();this.syncSel();},
+ E(x,y){let ex=0,ey=0;const parts=[];this.Q.forEach((s,i)=>{const dx=x-s.x,dy=y-s.y,r2=dx*dx+dy*dy,r=Math.sqrt(r2),E=K*s.q*1e-9/r2;const e=[E*dx/r,E*dy/r,Math.abs(E),r];parts.push(e);ex+=e[0];ey+=e[1];});return {ex,ey,parts};},
+ autoscale(){const {ex,ey,parts}=this.E(this.P.x,this.P.y);const m=Math.max(Math.hypot(ex,ey),...parts.map(p=>p[2]),1e-9);this.base=Math.min(V.W,V.H)*0.28/m;},
+ syncSel(){const s=this.Q[this.sel];if(s){$('#s_q').value=s.q;$('#s_q_v').textContent=s.q;}},
+ enter(){if(!this.Q.length)this.preset('point');else V.fit(...this.view);setHint('Drag charges or the probe P · click a charge to select it');},
+ draw(){V.grid('m');const {ex,ey,parts}=this.E(this.P.x,this.P.y);const S=this.base*this.sc;
+  if($('#s_grid').checked){const st=42;for(let px=st/2;px<V.W;px+=st)for(let py=st/2;py<V.H;py+=st){const X=V.ix(px),Y=V.iy(py);if(this.Q.some(s=>Math.hypot(V.X(s.x)-px,V.Y(s.y)-py)<24))continue;const e=this.E(X,Y),m=Math.hypot(e.ex,e.ey);if(!m)continue;const a=Math.max(.12,Math.min(.85,0.25*Math.log10(m)));arrow(c,px-8*e.ex/m,py+8*e.ey/m,px+8*e.ex/m,py-8*e.ey/m,`rgba(46,125,50,${a})`,1.5,6);}}
+  const Px=V.X(this.P.x),Py=V.Y(this.P.y);
+  this.Q.forEach((s,i)=>{c.strokeStyle=COLS[i%8]+'55';c.setLineDash([3,4]);c.lineWidth=1.2;c.beginPath();c.moveTo(V.X(s.x),V.Y(s.y));c.lineTo(Px,Py);c.stroke();c.setLineDash([]);});
+  let cx=Px,cy=Py;const tail=$('#s_tail').checked;
+  parts.forEach((p,i)=>{const L=Math.hypot(p[0],p[1])*S,f=L>V.W?V.W/L:1;const x1=(tail?cx:Px)+p[0]*S*f,y1=(tail?cy:Py)-p[1]*S*f;arrow(c,tail?cx:Px,tail?cy:Py,x1,y1,COLS[i%8],3,11);label(c,'E'+sub(i+1),x1+6,y1-4,COLS[i%8],14,'left',true);if(tail){cx=x1;cy=y1;}});
+  const nx=Px+ex*S,ny=Py-ey*S;
+  if($('#s_comp').checked&&Math.hypot(ex,ey)>0){c.save();c.strokeStyle='#2e7d32';c.setLineDash([5,4]);c.lineWidth=1.5;c.beginPath();c.moveTo(nx,ny);c.lineTo(nx,Py);c.moveTo(nx,ny);c.lineTo(Px,ny);c.stroke();c.restore();arrow(c,Px,Py,nx,Py,'#66bb6a',2.5,9);arrow(c,Px,Py,Px,ny,'#66bb6a',2.5,9);label(c,'Eₓ',(Px+nx)/2,Py+18,'#2e7d32',13,'center');label(c,'E_y',Px-6,(Py+ny)/2,'#2e7d32',13,'right');}
+  arrow(c,Px,Py,nx,ny,'#2e7d32',5,15);label(c,'E_net',nx+8,ny+16,'#2e7d32',16,'left',true);
+  this.Q.forEach((s,i)=>drawCharge(c,V.X(s.x),V.Y(s.y),s.q,15,'q'+sub(i+1)+' = '+s.q+' nC',i===this.sel));
+  c.strokeStyle='#111';c.lineWidth=2.5;c.beginPath();c.arc(Px,Py,9,0,7);c.stroke();c.fillStyle='#111';c.beginPath();c.arc(Px,Py,2.5,0,7);c.fill();label(c,`P(${this.P.x.toFixed(2)}, ${this.P.y.toFixed(2)})`,Px+12,Py-12,'#111',14,'left',true);
+  const E=Math.hypot(ex,ey),th=Math.atan2(ey,ex)*180/Math.PI;
+  $('#s_read').innerHTML=`<div><span>|E_net|</span><b>${fmt(E,4)} N/C</b></div><div><span>E_net</span><b>(${fmt(ex,4)}, ${fmt(ey,4)}) N/C</b></div><div><span>direction θ (from +x)</span><b>${th.toFixed(1)}°</b></div>`;
+  let h='<tr><th></th><th>q (nC)</th><th>r (m)</th><th>|E|</th><th>Eₓ</th><th>E_y</th></tr>';parts.forEach((p,i)=>h+=`<tr><td style="color:${COLS[i%8]};font-weight:700">E${sub(i+1)}</td><td>${this.Q[i].q}</td><td>${p[3].toFixed(3)}</td><td>${fmt(p[2],3)}</td><td>${fmt(p[0],3)}</td><td>${fmt(p[1],3)}</td></tr>`);
+  h+=`<tr class="sum"><td>Σ</td><td></td><td></td><td>${fmt(E,3)}</td><td>${fmt(ex,3)}</td><td>${fmt(ey,3)}</td></tr>`;$('#s_tab').innerHTML=h;setBadge('');},
+ down(x,y){if(Math.hypot(V.X(this.P.x)-x,V.Y(this.P.y)-y)<16){this.drag=this.P;return true;}for(let i=this.Q.length-1;i>=0;i--){const s=this.Q[i];if(Math.hypot(V.X(s.x)-x,V.Y(s.y)-y)<20){this.drag=s;this.sel=i;this.syncSel();return true;}}return false;},
+ move(x,y){const nx=V.ix(x),ny=V.iy(y);const others=this.drag===this.P?this.Q:[this.P];for(const o of others)if(Math.hypot(o.x-nx,o.y-ny)<0.04)return;this.drag.x=Math.round(nx*100)/100;this.drag.y=Math.round(ny*100)/100;}};
+function sub(n){return String(n).split('').map(d=>'₀₁₂₃₄₅₆₇₈₉'[+d]).join('');}
+$$('#s_presets button').forEach(b=>b.onclick=()=>T.super.preset(b.dataset.p));
+$('#s_addp').onclick=()=>{const S=T.super;S.Q.push({x:+(V.ix(V.W*0.3)).toFixed(2),y:+(V.iy(V.H*0.25)).toFixed(2),q:3});S.sel=S.Q.length-1;S.syncSel();};
+$('#s_addn').onclick=()=>{const S=T.super;S.Q.push({x:+(V.ix(V.W*0.7)).toFixed(2),y:+(V.iy(V.H*0.75)).toFixed(2),q:-3});S.sel=S.Q.length-1;S.syncSel();};
+$('#s_del').onclick=()=>{const S=T.super;if(S.Q.length>1){S.Q.splice(S.sel,1);S.sel=0;S.syncSel();}};
+slider('s_q',v=>{const s=T.super.Q[T.super.sel];if(s)s.q=v;},v=>v);
+slider('s_sc',v=>T.super.sc=Math.pow(10,v),v=>'×'+fmt(Math.pow(10,v),2));
+
+/* ---------- loop ---------- */
+pointer(cv,{down:(x,y)=>T[tab].down(x,y),move:(x,y)=>T[tab].move(x,y),up:()=>{if(T[tab].drag!==undefined)T[tab].drag=null;}});
+cv._hover=(x,y)=>tab==='coulomb'?!!T.coulomb.hit(x,y):tab==='bead'?Math.abs(x-V.X(T.bead.x))<22&&Math.abs(y-V.Y(0))<26:false;
+window.addEventListener('resize',()=>V.resize());V.resize();
+setupTabs(['coulomb','bead','super'],n=>{tab=n;T[n].enter();});
+let last=performance.now();(function loop(t){const dt=Math.min(0.05,(t-last)/1000);last=t;if(tab==='bead')T.bead.step(dt);V.clear();T[tab].draw();requestAnimationFrame(loop);})(last);
+</script>
+</body></html>
